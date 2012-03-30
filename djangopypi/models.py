@@ -56,7 +56,7 @@ class Package(models.Model):
     owner = models.ForeignKey(User, related_name="packages_owned")
     name = models.CharField(max_length=255)
     auto_hide = models.BooleanField(default=True, blank=False)
-    allow_comments = models.BooleanField(default=True, blank=False)
+    # allow_comments = models.BooleanField(default=True, blank=False)
     maintainers = models.ManyToManyField(User, blank=True,
                                          related_name="packages_maintained")
     private = models.BooleanField(default=False)
