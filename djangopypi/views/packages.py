@@ -11,23 +11,26 @@ from djangopypi.models import Package, Release
 from djangopypi.forms import SimplePackageSearchForm, PackageForm
 
 
-
 def index(request, **kwargs):
     kwargs.setdefault('template_object_name', 'package')
-    kwargs.setdefault('queryset', Package.objects.all())
+    kwargs.setdefault('queryset', Package.objects.filter(owner=request.user))
+    kwargs.pop('username')
     return list_detail.object_list(request, **kwargs)
 
 def simple_index(request, **kwargs):
+    kwargs.pop('username')
     kwargs.setdefault('template_name', 'djangopypi/package_list_simple.html')
     return index(request, **kwargs)
 
 def details(request, package, **kwargs):
     kwargs.setdefault('template_object_name', 'package')
-    kwargs.setdefault('queryset', Package.objects.all())
+    kwargs.setdefault('queryset', Package.objects.filter(owner=request.user))
+    kwargs.pop('username')
     return list_detail.object_detail(request, object_id=package, **kwargs)
 
 def simple_details(request, package, **kwargs):
     kwargs.setdefault('template_name', 'djangopypi/package_detail_simple.html')
+    kwargs.pop('username')
     try:
         return details(request, package, **kwargs)
     except Http404, e:
@@ -40,6 +43,7 @@ def simple_details(request, package, **kwargs):
 def doap(request, package, **kwargs):
     kwargs.setdefault('template_name', 'djangopypi/package_doap.xml')
     kwargs.setdefault('mimetype', 'text/xml')
+    kwargs.pop('username')
     return details(request, package, **kwargs)
 
 def search(request, **kwargs):
@@ -47,15 +51,16 @@ def search(request, **kwargs):
         form = SimplePackageSearchForm(request.POST)
     else:
         form = SimplePackageSearchForm(request.GET)
-    
+    kwargs.pop('username')
     if form.is_valid():
         q = form.cleaned_data['query']
-        kwargs['queryset'] = Package.objects.filter(Q(name__contains=q) | 
+        kwargs['queryset'] = Package.objects.filter(owner=request.user).filter(Q(name__contains=q) | 
                                                     Q(releases__package_info__contains=q)).distinct()
     return index(request, **kwargs)
 
 @user_owns_package()
 def manage(request, package, **kwargs):
+    kwargs.pop('username')
     kwargs['object_id'] = package
     kwargs.setdefault('form_class', PackageForm)
     kwargs.setdefault('template_name', 'djangopypi/package_manage.html')
@@ -65,7 +70,8 @@ def manage(request, package, **kwargs):
 
 @user_maintains_package()
 def manage_versions(request, package, **kwargs):
-    package = get_object_or_404(Package, name=package)
+    kwargs.pop('username')
+    package = get_object_or_404(Package, owner=request.user, name=package)
     kwargs.setdefault('formset_factory_kwargs', {})
     kwargs['formset_factory_kwargs'].setdefault('fields', ('hidden',))
     kwargs['formset_factory_kwargs']['extra'] = 0
