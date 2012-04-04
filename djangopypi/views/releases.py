@@ -14,19 +14,21 @@ from djangopypi.forms import ReleaseForm, DistributionUploadForm
 
 def index(request, **kwargs):
     kwargs.setdefault('template_object_name','release')
-    kwargs.setdefault('queryset',Release.objects.filter(hidden=False))
+    params = dict(package__owner=request.user, hidden=False)
+    kwargs.setdefault('queryset', Release.objects.filter(**params))
+    kwargs.pop('username')
     return list_detail.object_list(request, **kwargs)
 
 def details(request, package, version, **kwargs):
-    release = get_object_or_404(Package, name=package).get_release(version)
+    release = get_object_or_404(Package, owner=request.user, name=package).get_release(version)
     
     if not release:
         raise Http404('Version %s does not exist for %s' % (version,
                                                             package,))
     
-    kwargs.setdefault('template_object_name','release')
-    kwargs.setdefault('template_name','djangopypi/release_detail.html')
-    kwargs.setdefault('extra_context',{})
+    kwargs.setdefault('template_object_name', 'release')
+    kwargs.setdefault('template_name', 'djangopypi/release_detail.html')
+    kwargs.setdefault('extra_context', {})
     kwargs.setdefault('mimetype',settings.DEFAULT_CONTENT_TYPE)
     
     kwargs['extra_context'][kwargs['template_object_name']] = release
@@ -42,7 +44,8 @@ def doap(request, package, version, **kwargs):
 
 @user_maintains_package()
 def manage(request, package, version, **kwargs):
-    release = get_object_or_404(Package, name=package).get_release(version)
+    kwargs.pop('username')
+    release = get_object_or_404(Package, owner=request.user, name=package).get_release(version)
     
     if not release:
         raise Http404('Version %s does not exist for %s' % (version,
@@ -58,12 +61,13 @@ def manage(request, package, version, **kwargs):
 
 @user_maintains_package()
 def manage_metadata(request, package, version, **kwargs):
+    kwargs.pop('username')
     kwargs.setdefault('template_name', 'djangopypi/release_manage.html')
     kwargs.setdefault('template_object_name', 'release')
-    kwargs.setdefault('extra_context',{})
-    kwargs.setdefault('mimetype',settings.DEFAULT_CONTENT_TYPE)
+    kwargs.setdefault('extra_context', {})
+    kwargs.setdefault('mimetype', settings.DEFAULT_CONTENT_TYPE)
     
-    release = get_object_or_404(Package, name=package).get_release(version)
+    release = get_object_or_404(Package, owner=request.user, name=package).get_release(version)
     
     if not release:
         raise Http404('Version %s does not exist for %s' % (version,
@@ -110,7 +114,7 @@ def manage_metadata(request, package, version, **kwargs):
 
 @user_maintains_package()
 def manage_files(request, package, version, **kwargs):
-    release = get_object_or_404(Package, name=package).get_release(version)
+    release = get_object_or_404(Package, owner=request.user, name=package).get_release(version)
     
     if not release:
         raise Http404('Version %s does not exist for %s' % (version,
@@ -150,7 +154,7 @@ def manage_files(request, package, version, **kwargs):
 
 @user_maintains_package()
 def upload_file(request, package, version, **kwargs):
-    release = get_object_or_404(Package, name=package).get_release(version)
+    release = get_object_or_404(Package, owner=request.user, name=package).get_release(version)
     
     if not release:
         raise Http404('Version %s does not exist for %s' % (version,

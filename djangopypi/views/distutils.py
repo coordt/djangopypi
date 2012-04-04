@@ -20,10 +20,7 @@ ALREADY_EXISTS_FMT = _(
 def submit_package_or_release(user, post_data, files):
     """Registers/updates a package or release"""
     try:
-        package = Package.objects.get(name=post_data['name'])
-        if user not in package.owners.all():
-            return HttpResponseForbidden(
-                    "That package is owned by someone else!")
+        package = Package.objects.get(owner=user, name=post_data['name'])
     except Package.DoesNotExist:
         package = None
 
@@ -70,22 +67,19 @@ def submit_package_or_release(user, post_data, files):
 
 @basic_auth
 @transaction.commit_manually
-def register_or_upload(request):
+def register_or_upload(request, username=None):
     if request.method != 'POST':
         return HttpResponseBadRequest('Only post requests are supported')
-    
-    name = request.POST.get('name',None).strip()
+    name = request.POST.get('name', None).strip()
     
     if not name:
         return HttpResponseBadRequest('No package name specified')
-    
     try:
-        package = Package.objects.get(name=name)
+        package = Package.objects.get(owner=request.user, name=name)
     except Package.DoesNotExist:
-        package = Package.objects.create(name=name)
-        package.owners.add(request.user)
+        package = Package.objects.create(owner=request.user, name=name)
     
-    if (request.user not in package.owners.all() and 
+    if (request.user != package.owner and 
         request.user not in package.maintainers.all()):
         
         return HttpResponseForbidden('You are not an owner/maintainer of %s' % (package.name,))

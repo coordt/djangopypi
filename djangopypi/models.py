@@ -53,20 +53,20 @@ class Classifier(models.Model):
         return self.name
 
 class Package(models.Model):
-    name = models.CharField(max_length=255, unique=True, primary_key=True,
-                            editable=False)
+    owner = models.ForeignKey(User, related_name="packages_owned")
+    name = models.CharField(max_length=255)
     auto_hide = models.BooleanField(default=True, blank=False)
-    allow_comments = models.BooleanField(default=True, blank=False)
-    owners = models.ManyToManyField(User, blank=True,
-                                    related_name="packages_owned")
+    # allow_comments = models.BooleanField(default=True, blank=False)
     maintainers = models.ManyToManyField(User, blank=True,
                                          related_name="packages_maintained")
+    private = models.BooleanField(default=False)
 
     class Meta:
         verbose_name = _(u"package")
         verbose_name_plural = _(u"packages")
         get_latest_by = "releases__latest"
         ordering = ['name',]
+        unique_together = ('owner', 'name',)
 
     def __unicode__(self):
         return self.name
