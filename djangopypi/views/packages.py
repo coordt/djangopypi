@@ -9,6 +9,7 @@ from django.views.generic import list_detail, create_update
 from djangopypi.decorators import user_owns_package, user_maintains_package
 from djangopypi.models import Package, Release
 from djangopypi.forms import SimplePackageSearchForm, PackageForm
+from djangopypi.settings import PROXY_MISSING, PROXY_BASE_URL
 
 
 def index(request, **kwargs):
@@ -34,9 +35,9 @@ def simple_details(request, package, **kwargs):
     try:
         return details(request, package, **kwargs)
     except Http404, e:
-        if settings.DJANGOPYPI_PROXY_MISSING:
+        if PROXY_MISSING:
             return HttpResponseRedirect('%s/%s/' % 
-                                        (settings.DJANGOPYPI_PROXY_BASE_URL.rstrip('/'),
+                                        (PROXY_BASE_URL.rstrip('/'),
                                          package))
         raise e
 

@@ -6,7 +6,12 @@ from django.utils import simplejson as json
 from django.utils.datastructures import MultiValueDict
 from django.contrib.auth.models import User
 
+from djangopypi.settings import (RELEASE_UPLOAD_TO, DIST_FILE_TYPES, 
+    PYTHON_VERSIONS, DIST_FILE_TYPES, RELEASE_FILE_STORAGE)
 
+from django.core.files.storage import get_storage_class
+
+FILE_STORAGE = get_storage_class(RELEASE_FILE_STORAGE)
 
 class PackageInfoField(models.Field):
     description = u'Python Package Information Field'
@@ -132,12 +137,12 @@ class Release(models.Model):
 class Distribution(models.Model):
     release = models.ForeignKey(Release, related_name="distributions",
                                 editable=False)
-    content = models.FileField(upload_to=settings.DJANGOPYPI_RELEASE_UPLOAD_TO)
+    content = models.FileField(upload_to=RELEASE_UPLOAD_TO, storage=FILE_STORAGE())
     md5_digest = models.CharField(max_length=32, blank=True, editable=False)
     filetype = models.CharField(max_length=32, blank=False,
-                                choices=settings.DJANGOPYPI_DIST_FILE_TYPES)
+                                choices=DIST_FILE_TYPES)
     pyversion = models.CharField(max_length=16, blank=True,
-                                 choices=settings.DJANGOPYPI_PYTHON_VERSIONS)
+                                 choices=PYTHON_VERSIONS)
     comment = models.CharField(max_length=255, blank=True)
     signature = models.TextField(blank=True)
     created = models.DateTimeField(auto_now_add=True, editable=False)
@@ -149,7 +154,7 @@ class Distribution(models.Model):
 
     @property
     def display_filetype(self):
-        for key,value in settings.DJANGOPYPI_DIST_FILE_TYPES:
+        for key,value in DIST_FILE_TYPES:
             if key == self.filetype:
                 return value
         return self.filetype

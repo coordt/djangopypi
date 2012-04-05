@@ -1,7 +1,6 @@
 import os
 import re
 
-from django.conf import settings
 from django.db import transaction
 from django.http import *
 from django.utils.translation import ugettext_lazy as _
@@ -11,7 +10,7 @@ from django.contrib.auth import login
 from djangopypi.decorators import basic_auth
 from djangopypi.forms import PackageForm, ReleaseForm
 from djangopypi.models import Package, Release, Distribution, Classifier
-
+from djangopypi.settings import ALLOW_VERSION_OVERWRITE, METADATA_FIELDS
 
 
 ALREADY_EXISTS_FMT = _(
@@ -33,8 +32,7 @@ def submit_package_or_release(user, post_data, files):
             classifier, created = Classifier.objects.get_or_create(name=c)
             package.classifiers.add(classifier)
         if files:
-            allow_overwrite = getattr(settings,
-                "DJANGOPYPI_ALLOW_VERSION_OVERWRITE", False)
+            allow_overwrite = ALLOW_VERSION_OVERWRITE
             try:
                 release = Release.objects.get(version=post_data['version'],
                                               package=package,
@@ -91,10 +89,10 @@ def register_or_upload(request, username=None):
         transaction.rollback()
         return HttpResponseBadRequest('Release version and metadata version must be specified')
     
-    if not metadata_version in settings.DJANGOPYPI_METADATA_FIELDS:
+    if not metadata_version in METADATA_FIELDS:
         transaction.rollback()
         return HttpResponseBadRequest('Metadata version must be one of: %s' 
-                                      (', '.join(settings.DJANGOPYPI_METADATA_FIELDS.keys()),))
+                                      (', '.join(METADATA_FIELDS.keys()),))
     
     release, created = Release.objects.get_or_create(package=package,
                                                      version=version)
@@ -105,7 +103,7 @@ def register_or_upload(request, username=None):
     
     release.metadata_version = metadata_version
     
-    fields = settings.DJANGOPYPI_METADATA_FIELDS[metadata_version]
+    fields = METADATA_FIELDS[metadata_version]
     
     if 'classifiers' in request.POST:
         request.POST.setlist('classifier',request.POST.getlist('classifiers'))
