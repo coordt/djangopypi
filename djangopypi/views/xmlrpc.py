@@ -1,11 +1,10 @@
 import xmlrpclib
 
-from django.conf import settings
 from django.http import HttpResponseNotAllowed, HttpResponse
 
 from djangopypi.models import Package, Release
-
-
+from djangopypi.settings import XMLRPC_COMMANDS
+from djangopypi.utils import get_class
 
 class XMLRPCResponse(HttpResponse):
     """ A wrapper around the base HttpResponse that dumps the output for xmlrpc
@@ -21,10 +20,10 @@ def parse_xmlrpc_request(request):
     """
     args, command = xmlrpclib.loads(request.raw_post_data)
     
-    if command in settings.DJANGOPYPI_XMLRPC_COMMANDS:
-        return settings.DJANGOPYPI_XMLRPC_COMMANDS[command](request, *args)
+    if command in XMLRPC_COMMANDS:
+        return get_class(XMLRPC_COMMANDS[command])(request, *args)
     else:
-        return HttpResponseNotAllowed(settings.DJANGOPYPI_XMLRPC_COMMANDS.keys())
+        return HttpResponseNotAllowed(XMLRPC_COMMANDS.keys())
 
 def list_packages(request):
     return XMLRPCResponse(params=(list(Package.objects.all().values_list('name', flat=True)),),

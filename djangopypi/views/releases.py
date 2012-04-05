@@ -9,8 +9,8 @@ from django.template import RequestContext
 from djangopypi.decorators import user_owns_package, user_maintains_package
 from djangopypi.models import Package, Release, Distribution
 from djangopypi.forms import ReleaseForm, DistributionUploadForm
-
-
+from djangopypi.settings import METADATA_FORMS
+from djangopypi.utils import get_class
 
 def index(request, **kwargs):
     kwargs.setdefault('template_object_name','release')
@@ -73,13 +73,13 @@ def manage_metadata(request, package, version, **kwargs):
         raise Http404('Version %s does not exist for %s' % (version,
                                                             package,))
     
-    if not release.metadata_version in settings.DJANGOPYPI_METADATA_FORMS:
+    if not release.metadata_version in METADATA_FORMS:
         #TODO: Need to change this to a more meaningful error
         raise Http404()
     
     kwargs['extra_context'][kwargs['template_object_name']] = release
     
-    form_class = settings.DJANGOPYPI_METADATA_FORMS.get(release.metadata_version)
+    form_class = get_class(METADATA_FORMS.get(release.metadata_version))
     
     initial = {}
     multivalue = ('classifier',)
