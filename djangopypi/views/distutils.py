@@ -1,9 +1,8 @@
 import os
-import re
 
-from django.conf import settings
 from django.db import transaction
-from django.http import *
+from django.http import (HttpResponseForbidden, HttpResponseBadRequest, 
+                         HttpResponse)
 from django.utils.translation import ugettext_lazy as _
 from django.utils.datastructures import MultiValueDict
 from django.contrib.auth import login
@@ -11,7 +10,7 @@ from django.contrib.auth import login
 from djangopypi.decorators import basic_auth
 from djangopypi.forms import PackageForm, ReleaseForm
 from djangopypi.models import Package, Release, Distribution, Classifier
-
+from djangopypi.settings import (ALLOW_VERSION_OVERWRITE, METADATA_FIELDS, RELEASE_UPLOAD_TO)
 
 
 ALREADY_EXISTS_FMT = _(
@@ -33,12 +32,11 @@ def submit_package_or_release(user, post_data, files):
             classifier, created = Classifier.objects.get_or_create(name=c)
             package.classifiers.add(classifier)
         if files:
-            allow_overwrite = getattr(settings,
-                "DJANGOPYPI_ALLOW_VERSION_OVERWRITE", False)
+            allow_overwrite = ALLOW_VERSION_OVERWRITE
             try:
                 release = Release.objects.get(version=post_data['version'],
                                               package=package,
-                                              distribution=UPLOAD_TO + '/' +
+                                              distribution=RELEASE_UPLOAD_TO + '/' +
                                               files['distribution']._name)
                 if not allow_overwrite:
                     return HttpResponseForbidden(ALREADY_EXISTS_FMT % (
@@ -69,10 +67,12 @@ def submit_package_or_release(user, post_data, files):
 @transaction.commit_manually
 def register_or_upload(request, username=None):
     if request.method != 'POST':
+        transaction.rollback()
         return HttpResponseBadRequest('Only post requests are supported')
     name = request.POST.get('name', None).strip()
     
     if not name:
+        transaction.rollback()
         return HttpResponseBadRequest('No package name specified')
     try:
         package = Package.objects.get(owner=request.user, name=name)
@@ -81,20 +81,22 @@ def register_or_upload(request, username=None):
     
     if (request.user != package.owner and 
         request.user not in package.maintainers.all()):
-        
-        return HttpResponseForbidden('You are not an owner/maintainer of %s' % (package.name,))
+        transaction.rollback()
+        return HttpResponseForbidden(
+            'You are not an owner/maintainer of %s' % (package.name,))
     
-    version = request.POST.get('version',None).strip()
+    version = request.POST.get('version', None).strip()
     metadata_version = request.POST.get('metadata_version', None).strip()
     
     if not version or not metadata_version:
         transaction.rollback()
-        return HttpResponseBadRequest('Release version and metadata version must be specified')
+        return HttpResponseBadRequest(
+            'Release version and metadata version must be specified')
     
-    if not metadata_version in settings.DJANGOPYPI_METADATA_FIELDS:
+    if not metadata_version in METADATA_FIELDS:
         transaction.rollback()
         return HttpResponseBadRequest('Metadata version must be one of: %s' 
-                                      (', '.join(settings.DJANGOPYPI_METADATA_FIELDS.keys()),))
+                                      (', '.join(METADATA_FIELDS.keys()),))
     
     release, created = Release.objects.get_or_create(package=package,
                                                      version=version)
@@ -105,10 +107,10 @@ def register_or_upload(request, username=None):
     
     release.metadata_version = metadata_version
     
-    fields = settings.DJANGOPYPI_METADATA_FIELDS[metadata_version]
+    fields = METADATA_FIELDS[metadata_version]
     
     if 'classifiers' in request.POST:
-        request.POST.setlist('classifier',request.POST.getlist('classifiers'))
+        request.POST.setlist('classifier', request.POST.getlist('classifiers'))
     
     release.package_info = MultiValueDict(dict(filter(lambda t: t[0] in fields,
                                                       request.POST.iterlists())))
@@ -118,6 +120,7 @@ def register_or_upload(request, username=None):
                                      filter(lambda v: v != 'UNKNOWN', value))
     
     release.save()
+    
     if not 'content' in request.FILES:
         transaction.commit()
         return HttpResponse('release registered')
@@ -129,7 +132,7 @@ def register_or_upload(request, username=None):
             """ Need to add handling optionally deleting old and putting up new """
             transaction.rollback()
             return HttpResponseBadRequest('That file has already been uploaded...')
-
+    
     md5_digest = request.POST.get('md5_digest','')
     
     try:
@@ -143,7 +146,8 @@ def register_or_upload(request, username=None):
                                                md5_digest=md5_digest)
     except Exception, e:
         transaction.rollback()
-        print str(e)
+        print "Issue creating a Distribution", str(e)
+        raise
     
     transaction.commit()
     
@@ -151,5 +155,5 @@ def register_or_upload(request, username=None):
 
 def list_classifiers(request, mimetype='text/plain'):
     response = HttpResponse(mimetype=mimetype)
-    response.write(u'\n'.join(map(lambda c: c.name,Classifier.objects.all())))
+    response.write(u'\n'.join(map(lambda c: c.name, Classifier.objects.all())))
     return response

@@ -10,10 +10,10 @@ urlpatterns = patterns("djangopypi.views",
     url(r'^pypi/$', 'root', name='djangopypi-release-index'),
     url(r'^rss/$', ReleaseFeed(), name='djangopypi-rss'),
     
-    url(r'^simple/(?P<package>[\w\d_\.\-]+)/$','packages.simple_details',
+    url(r'^simple/(?P<package>[\w\d_\.\-]+)/?$','packages.simple_details',
         name='djangopypi-package-simple'),
     
-    url(r'^pypi/(?P<package>[\w\d_\.\-]+)/$','packages.details',
+    url(r'^pypi/(?P<package>[\w\d_\.\-]+)/?$','packages.details',
         name='djangopypi-package'),
     url(r'^pypi/(?P<package>[\w\d_\.\-]+)/rss/$', ReleaseFeed(),
         name='djangopypi-package-rss'),    

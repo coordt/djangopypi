@@ -1,10 +1,11 @@
-from django.conf import settings
 from django.http import HttpResponseNotAllowed
 
 from djangopypi.decorators import csrf_exempt
 from djangopypi.http import parse_distutils_request
 from djangopypi.models import Package, Release
 from djangopypi.views.xmlrpc import parse_xmlrpc_request
+from djangopypi.settings import (FALLBACK_VIEW, ACTION_VIEWS)
+from djangopypi.utils import get_class
 
 @csrf_exempt
 def root(request, fallback_view=None, **kwargs):
@@ -21,11 +22,11 @@ def root(request, fallback_view=None, **kwargs):
     
     if not action:
         if fallback_view is None:
-            fallback_view = settings.DJANGOPYPI_FALLBACK_VIEW
+            fallback_view = get_class(FALLBACK_VIEW)
         return fallback_view(request, **kwargs)
     
-    if not action in settings.DJANGOPYPI_ACTION_VIEWS:
+    if not action in ACTION_VIEWS:
         print 'unknown action: %s' % (action,)
-        return HttpResponseNotAllowed(settings.DJANGOPYPI_ACTION_VIEW.keys())
+        return HttpResponseNotAllowed(ACTION_VIEWS.keys())
     
-    return settings.DJANGOPYPI_ACTION_VIEWS[action](request, **kwargs)
+    return get_class(ACTION_VIEWS[action])(request, **kwargs)
