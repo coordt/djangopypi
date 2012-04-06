@@ -1,4 +1,6 @@
 import sys, traceback
+from django.utils.importlib import import_module
+from django.core.exceptions import ImproperlyConfigured
 
 def debug(func):
     # @debug is handy when debugging distutils requests
