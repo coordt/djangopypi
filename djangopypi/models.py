@@ -64,7 +64,7 @@ class Package(models.Model):
     # allow_comments = models.BooleanField(default=True, blank=False)
     maintainers = models.ManyToManyField(User, blank=True,
                                          related_name="packages_maintained")
-    private = models.BooleanField(default=False)
+    private = models.BooleanField(default=True)
 
     class Meta:
         verbose_name = _(u"package")
