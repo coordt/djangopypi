@@ -2,9 +2,9 @@ import xmlrpclib
 
 from django.http import HttpResponseNotAllowed, HttpResponse
 
-from djangopypi.models import Package, Release
-from djangopypi.settings import XMLRPC_COMMANDS
-from djangopypi.utils import get_class
+from userpypi.models import Package, Release
+from userpypi.settings import XMLRPC_COMMANDS
+from userpypi.utils import get_class
 
 class XMLRPCResponse(HttpResponse):
     """ A wrapper around the base HttpResponse that dumps the output for xmlrpc

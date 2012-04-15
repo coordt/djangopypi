@@ -61,12 +61,16 @@ class Classifier(models.Model):
 class Package(models.Model):
     owner = models.ForeignKey(User, related_name="packages_owned")
     name = models.CharField(max_length=255)
-    auto_hide = models.BooleanField(default=True, blank=False)
+    auto_hide = models.BooleanField(_(u"Auto hide"), 
+        default=True, 
+        blank=False, 
+        help_text="""Automatically hide previous releases when new releases 
+                     are created.""")
     maintainers = models.ManyToManyField(
         User, 
         blank=True,
         related_name="packages_maintained",
-        through=Maintainer)
+        through='Maintainer')
     private = models.BooleanField(default=True)
 
     class Meta:

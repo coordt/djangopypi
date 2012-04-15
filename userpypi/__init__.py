@@ -21,7 +21,7 @@ def get_version(short=False):
 __version__ = get_version()
 
 try:
-    from djangopypi import settings
-    from djangopypi import signals
+    from userpypi import settings
+    from userpypi import signals
 except ImportError:
     pass

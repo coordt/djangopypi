@@ -4,8 +4,8 @@ from django import forms
 from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
 
-from djangopypi.settings import (ALLOW_VERSION_OVERWRITE, METADATA_FIELDS, )
-from djangopypi.models import Package, Classifier, Release, Distribution
+from userpypi.settings import (ALLOW_VERSION_OVERWRITE, METADATA_FIELDS, )
+from userpypi.models import Package, Classifier, Release, Distribution
 
 
 
@@ -15,12 +15,12 @@ class SimplePackageSearchForm(forms.Form):
 class PackageForm(forms.ModelForm):
     class Meta:
         model = Package
-        exclude = ['name']
+        exclude = ['name', 'owner', 'private']
 
 class DistributionUploadForm(forms.ModelForm):
     class Meta:
         model = Distribution
-        fields = ('content','comment','filetype','pyversion',)
+        fields = ('content', 'comment', 'filetype', 'pyversion',)
     
     def clean_content(self):
         content = self.cleaned_data['content']

@@ -1,7 +1,7 @@
 from django.db.models import signals
 from django.utils.hashcompat import md5_constructor
 
-from djangopypi.models import Package, Release, Distribution
+from userpypi.models import Package, Release, Distribution
 
 
 def autohide_new_release_handler(sender, instance, created, *args, **kwargs):

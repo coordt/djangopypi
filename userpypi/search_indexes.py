@@ -1,6 +1,6 @@
 from django.conf import settings
 
-from djangopypi.models import Package
+from userpypi.models import Package
 
 if 'haystack' in settings.INSTALLED_APPS:
     from haystack import site
@@ -10,7 +10,7 @@ if 'haystack' in settings.INSTALLED_APPS:
     class PackageSearchIndex(SearchIndex):
         name = CharField(model_attr='name')
         text = CharField(document=True, use_template=True, null=True, stored=False,
-                         template_name='djangopypi/haystack/package_text.txt')
+                         template_name='userpypi/haystack/package_text.txt')
         author = MultiValueField(stored=False, null=True)
         classifier = MultiValueField(stored=False, null=True,
                                      model_attr='latest__classifiers')

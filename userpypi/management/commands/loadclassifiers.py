@@ -12,7 +12,7 @@ import urllib
 import os.path
 
 from django.core.management.base import BaseCommand
-from djangopypi.models import Classifier
+from userpypi.models import Classifier
 
 CLASSIFIERS_URL = "http://pypi.python.org/pypi?%3Aaction=list_classifiers"
 

@@ -10,7 +10,7 @@ from xmlrpclib import ServerProxy
 
 from django.core.files import File
 from django.core.management.base import BaseCommand
-from djangopypi.models import *
+from userpypi.models import *
 
 
 

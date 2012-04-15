@@ -10,18 +10,18 @@ Installation
 Path
 ____
 
-The first step is to get ``djangopypi`` into your Python path.
+The first step is to get ``userpypi`` into your Python path.
 
 Buildout
 ++++++++
 
-Simply add ``djangopypi`` to your list of ``eggs`` and run buildout again it 
+Simply add ``userpypi`` to your list of ``eggs`` and run buildout again it 
 should downloaded and installed properly.
 
 EasyInstall/Setuptools
 ++++++++++++++++++++++
 
-If you have setuptools installed, you can use ``easy_install djangopypi``
+If you have setuptools installed, you can use ``easy_install userpypi``
 
 Manual
 ++++++
@@ -33,14 +33,14 @@ Download and unpack the source then run::
 Django Settings
 _______________
 
-Add ``djangopypi`` to your ``INSTALLED_APPS`` setting and run ``syncdb`` again 
+Add ``userpypi`` to your ``INSTALLED_APPS`` setting and run ``syncdb`` again 
 to get the database tables [#]_.
 
-Then add an include in your url config for ``djangopypi.urls``::
+Then add an include in your url config for ``userpypi.urls``::
 
     urlpatterns = patterns("",
         ...
-        url(r'', include("djangopypi.urls"))
+        url(r'', include("userpypi.urls"))
     )
 
 This will make the repository interface be accessible at ``/pypi/``.
@@ -91,5 +91,5 @@ To push the package to the local pypi::
 
     $ python setup.py mregister -r local sdist mupload -r local
 
-.. [#] ``djangopypi`` is South enabled, if you are using South then you will need
+.. [#] ``userpypi`` is South enabled, if you are using South then you will need
    to run the South ``migrate`` command to get the tables.

@@ -11,6 +11,7 @@ from django.views.generic import ListView, DetailView, UpdateView, create_update
 from userpypi.decorators import user_owns_package, user_maintains_package
 from userpypi.models import Package, Release
 from userpypi.forms import SimplePackageSearchForm, PackageForm
+from django.views.generic import ListView, DetailView, UpdateView
 from userpypi.settings import PROXY_MISSING, PROXY_BASE_URL
 
 
@@ -18,7 +19,7 @@ class OwnerObjectMixin(object):
     def get_context_data(self, **kwargs):
         context = super(OwnerObjectMixin, self).get_context_data(**kwargs)
         context['owner'] = self.kwargs.get('owner', None)
-        context['is_owner'] = self.owner == self.request.user.owner
+        context['is_owner'] = self.owner == self.request.user.username
         return context
     
     def get_queryset(self):
@@ -28,7 +29,7 @@ class OwnerObjectMixin(object):
         """
         self.owner = self.kwargs['owner']
         
-        if self.request.user.owner != self.owner:
+        if self.request.user.username != self.owner:
             params = dict(owner__owner=self.owner, private=False)
         else:
             params = dict(owner=self.request.user)
@@ -107,7 +108,6 @@ class PackageManageView(OwnerObjectMixin, UpdateView):
     context_object_name = 'package'
     template_name = 'userpypi/package_manage.html'
     
-    @method_decorator(user_owns_package)
     def dispatch(self, *args, **kwargs):
         return super(PackageManageView, self).dispatch(*args, **kwargs)
     

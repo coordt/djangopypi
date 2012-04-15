@@ -9,15 +9,15 @@ class Migration(SchemaMigration):
     def forwards(self, orm):
         
         # Deleting model 'Project'
-        db.delete_table('djangopypi_project')
+        db.delete_table('userpypi_project')
 
         # Removing M2M table for field classifiers on 'Project'
-        db.delete_table('djangopypi_project_classifiers')
+        db.delete_table('userpypi_project_classifiers')
 
         # Adding model 'Distribution'
-        db.create_table('djangopypi_distribution', (
+        db.create_table('userpypi_distribution', (
             ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('release', self.gf('django.db.models.fields.related.ForeignKey')(related_name='distributions', to=orm['djangopypi.Release'])),
+            ('release', self.gf('django.db.models.fields.related.ForeignKey')(related_name='distributions', to=orm['userpypi.Release'])),
             ('content', self.gf('django.db.models.fields.files.FileField')(max_length=100)),
             ('md5_digest', self.gf('django.db.models.fields.CharField')(max_length=32, blank=True)),
             ('filetype', self.gf('django.db.models.fields.CharField')(max_length=32)),
@@ -27,97 +27,97 @@ class Migration(SchemaMigration):
             ('created', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, blank=True)),
             ('uploader', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['auth.User'])),
         ))
-        db.send_create_signal('djangopypi', ['Distribution'])
+        db.send_create_signal('userpypi', ['Distribution'])
 
         # Adding model 'Review'
-        db.create_table('djangopypi_review', (
+        db.create_table('userpypi_review', (
             ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('release', self.gf('django.db.models.fields.related.ForeignKey')(related_name='reviews', to=orm['djangopypi.Release'])),
+            ('release', self.gf('django.db.models.fields.related.ForeignKey')(related_name='reviews', to=orm['userpypi.Release'])),
             ('rating', self.gf('django.db.models.fields.PositiveSmallIntegerField')(blank=True)),
             ('comment', self.gf('django.db.models.fields.TextField')(blank=True)),
         ))
-        db.send_create_signal('djangopypi', ['Review'])
+        db.send_create_signal('userpypi', ['Review'])
 
         # Adding model 'Package'
-        db.create_table('djangopypi_package', (
+        db.create_table('userpypi_package', (
             ('name', self.gf('django.db.models.fields.CharField')(unique=True, max_length=255, primary_key=True)),
             ('auto_hide', self.gf('django.db.models.fields.BooleanField')(default=True, blank=True)),
             ('allow_comments', self.gf('django.db.models.fields.BooleanField')(default=True, blank=True)),
         ))
-        db.send_create_signal('djangopypi', ['Package'])
+        db.send_create_signal('userpypi', ['Package'])
 
         # Adding M2M table for field owners on 'Package'
-        db.create_table('djangopypi_package_owners', (
+        db.create_table('userpypi_package_owners', (
             ('id', models.AutoField(verbose_name='ID', primary_key=True, auto_created=True)),
-            ('package', models.ForeignKey(orm['djangopypi.package'], null=False)),
+            ('package', models.ForeignKey(orm['userpypi.package'], null=False)),
             ('user', models.ForeignKey(orm['auth.user'], null=False))
         ))
-        db.create_unique('djangopypi_package_owners', ['package_id', 'user_id'])
+        db.create_unique('userpypi_package_owners', ['package_id', 'user_id'])
 
         # Adding M2M table for field maintainers on 'Package'
-        db.create_table('djangopypi_package_maintainers', (
+        db.create_table('userpypi_package_maintainers', (
             ('id', models.AutoField(verbose_name='ID', primary_key=True, auto_created=True)),
-            ('package', models.ForeignKey(orm['djangopypi.package'], null=False)),
+            ('package', models.ForeignKey(orm['userpypi.package'], null=False)),
             ('user', models.ForeignKey(orm['auth.user'], null=False))
         ))
-        db.create_unique('djangopypi_package_maintainers', ['package_id', 'user_id'])
+        db.create_unique('userpypi_package_maintainers', ['package_id', 'user_id'])
 
         # Deleting field 'Classifier.id'
-        db.delete_column('djangopypi_classifier', 'id')
+        db.delete_column('userpypi_classifier', 'id')
 
         # Changing field 'Classifier.name'
-        db.alter_column('djangopypi_classifier', 'name', self.gf('django.db.models.fields.CharField')(max_length=255, primary_key=True))
+        db.alter_column('userpypi_classifier', 'name', self.gf('django.db.models.fields.CharField')(max_length=255, primary_key=True))
 
         # Deleting field 'Release.md5_digest'
-        db.delete_column('djangopypi_release', 'md5_digest')
+        db.delete_column('userpypi_release', 'md5_digest')
 
         # Deleting field 'Release.filetype'
-        db.delete_column('djangopypi_release', 'filetype')
+        db.delete_column('userpypi_release', 'filetype')
 
         # Deleting field 'Release.upload_time'
-        db.delete_column('djangopypi_release', 'upload_time')
+        db.delete_column('userpypi_release', 'upload_time')
 
         # Deleting field 'Release.pyversion'
-        db.delete_column('djangopypi_release', 'pyversion')
+        db.delete_column('userpypi_release', 'pyversion')
 
         # Deleting field 'Release.project'
-        db.delete_column('djangopypi_release', 'project_id')
+        db.delete_column('userpypi_release', 'project_id')
 
         # Deleting field 'Release.platform'
-        db.delete_column('djangopypi_release', 'platform')
+        db.delete_column('userpypi_release', 'platform')
 
         # Deleting field 'Release.signature'
-        db.delete_column('djangopypi_release', 'signature')
+        db.delete_column('userpypi_release', 'signature')
 
         # Deleting field 'Release.distribution'
-        db.delete_column('djangopypi_release', 'distribution')
+        db.delete_column('userpypi_release', 'distribution')
 
         # Adding field 'Release.package'
-        db.add_column('djangopypi_release', 'package', self.gf('django.db.models.fields.related.ForeignKey')(default='', related_name='releases', to=orm['djangopypi.Package']), keep_default=False)
+        db.add_column('userpypi_release', 'package', self.gf('django.db.models.fields.related.ForeignKey')(default='', related_name='releases', to=orm['userpypi.Package']), keep_default=False)
 
         # Adding field 'Release.metadata_version'
-        db.add_column('djangopypi_release', 'metadata_version', self.gf('django.db.models.fields.CharField')(default='1.0', max_length=64), keep_default=False)
+        db.add_column('userpypi_release', 'metadata_version', self.gf('django.db.models.fields.CharField')(default='1.0', max_length=64), keep_default=False)
 
         # Adding field 'Release.package_info'
-        db.add_column('djangopypi_release', 'package_info', self.gf('djangopypi.models.PackageInfoField')(default=''), keep_default=False)
+        db.add_column('userpypi_release', 'package_info', self.gf('userpypi.models.PackageInfoField')(default=''), keep_default=False)
 
         # Adding field 'Release.hidden'
-        db.add_column('djangopypi_release', 'hidden', self.gf('django.db.models.fields.BooleanField')(default=False, blank=True), keep_default=False)
+        db.add_column('userpypi_release', 'hidden', self.gf('django.db.models.fields.BooleanField')(default=False, blank=True), keep_default=False)
 
         # Adding field 'Release.created'
-        db.add_column('djangopypi_release', 'created', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, default='', blank=True), keep_default=False)
+        db.add_column('userpypi_release', 'created', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, default='', blank=True), keep_default=False)
 
         # Removing unique constraint on 'Release', fields ['project', 'platform', 'distribution', 'version', 'pyversion']
-        db.delete_unique('djangopypi_release', ['project_id', 'platform', 'distribution', 'version', 'pyversion'])
+        db.delete_unique('userpypi_release', ['project_id', 'platform', 'distribution', 'version', 'pyversion'])
 
         # Adding unique constraint on 'Release', fields ['version', 'package']
-        db.create_unique('djangopypi_release', ['version', 'package_id'])
+        db.create_unique('userpypi_release', ['version', 'package_id'])
 
 
     def backwards(self, orm):
         
         # Adding model 'Project'
-        db.create_table('djangopypi_project', (
+        db.create_table('userpypi_project', (
             ('updated', self.gf('django.db.models.fields.DateTimeField')(auto_now=True, blank=True)),
             ('description', self.gf('django.db.models.fields.TextField')(blank=True)),
             ('metadata_version', self.gf('django.db.models.fields.CharField')(default=1.0, max_length=64)),
@@ -131,81 +131,81 @@ class Migration(SchemaMigration):
             ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('author_email', self.gf('django.db.models.fields.CharField')(max_length=255, blank=True)),
         ))
-        db.send_create_signal('djangopypi', ['Project'])
+        db.send_create_signal('userpypi', ['Project'])
 
         # Adding M2M table for field classifiers on 'Project'
-        db.create_table('djangopypi_project_classifiers', (
+        db.create_table('userpypi_project_classifiers', (
             ('id', models.AutoField(verbose_name='ID', primary_key=True, auto_created=True)),
-            ('project', models.ForeignKey(orm['djangopypi.project'], null=False)),
-            ('classifier', models.ForeignKey(orm['djangopypi.classifier'], null=False))
+            ('project', models.ForeignKey(orm['userpypi.project'], null=False)),
+            ('classifier', models.ForeignKey(orm['userpypi.classifier'], null=False))
         ))
-        db.create_unique('djangopypi_project_classifiers', ['project_id', 'classifier_id'])
+        db.create_unique('userpypi_project_classifiers', ['project_id', 'classifier_id'])
 
         # Deleting model 'Distribution'
-        db.delete_table('djangopypi_distribution')
+        db.delete_table('userpypi_distribution')
 
         # Deleting model 'Review'
-        db.delete_table('djangopypi_review')
+        db.delete_table('userpypi_review')
 
         # Deleting model 'Package'
-        db.delete_table('djangopypi_package')
+        db.delete_table('userpypi_package')
 
         # Removing M2M table for field owners on 'Package'
-        db.delete_table('djangopypi_package_owners')
+        db.delete_table('userpypi_package_owners')
 
         # Removing M2M table for field maintainers on 'Package'
-        db.delete_table('djangopypi_package_maintainers')
+        db.delete_table('userpypi_package_maintainers')
 
         # Adding field 'Classifier.id'
-        db.add_column('djangopypi_classifier', 'id', self.gf('django.db.models.fields.AutoField')(default='', primary_key=True), keep_default=False)
+        db.add_column('userpypi_classifier', 'id', self.gf('django.db.models.fields.AutoField')(default='', primary_key=True), keep_default=False)
 
         # Changing field 'Classifier.name'
-        db.alter_column('djangopypi_classifier', 'name', self.gf('django.db.models.fields.CharField')(max_length=255, unique=True))
+        db.alter_column('userpypi_classifier', 'name', self.gf('django.db.models.fields.CharField')(max_length=255, unique=True))
 
         # Adding field 'Release.md5_digest'
-        db.add_column('djangopypi_release', 'md5_digest', self.gf('django.db.models.fields.CharField')(default='', max_length=255, blank=True), keep_default=False)
+        db.add_column('userpypi_release', 'md5_digest', self.gf('django.db.models.fields.CharField')(default='', max_length=255, blank=True), keep_default=False)
 
         # Adding field 'Release.filetype'
-        db.add_column('djangopypi_release', 'filetype', self.gf('django.db.models.fields.CharField')(default='', max_length=255, blank=True), keep_default=False)
+        db.add_column('userpypi_release', 'filetype', self.gf('django.db.models.fields.CharField')(default='', max_length=255, blank=True), keep_default=False)
 
         # Adding field 'Release.upload_time'
-        db.add_column('djangopypi_release', 'upload_time', self.gf('django.db.models.fields.DateTimeField')(auto_now=True, default='', blank=True), keep_default=False)
+        db.add_column('userpypi_release', 'upload_time', self.gf('django.db.models.fields.DateTimeField')(auto_now=True, default='', blank=True), keep_default=False)
 
         # Adding field 'Release.pyversion'
-        db.add_column('djangopypi_release', 'pyversion', self.gf('django.db.models.fields.CharField')(default='', max_length=255, blank=True), keep_default=False)
+        db.add_column('userpypi_release', 'pyversion', self.gf('django.db.models.fields.CharField')(default='', max_length=255, blank=True), keep_default=False)
 
         # Adding field 'Release.project'
-        db.add_column('djangopypi_release', 'project', self.gf('django.db.models.fields.related.ForeignKey')(default='', related_name='releases', to=orm['djangopypi.Project']), keep_default=False)
+        db.add_column('userpypi_release', 'project', self.gf('django.db.models.fields.related.ForeignKey')(default='', related_name='releases', to=orm['userpypi.Project']), keep_default=False)
 
         # Adding field 'Release.platform'
-        db.add_column('djangopypi_release', 'platform', self.gf('django.db.models.fields.CharField')(default='', max_length=255, blank=True), keep_default=False)
+        db.add_column('userpypi_release', 'platform', self.gf('django.db.models.fields.CharField')(default='', max_length=255, blank=True), keep_default=False)
 
         # Adding field 'Release.signature'
-        db.add_column('djangopypi_release', 'signature', self.gf('django.db.models.fields.CharField')(default='', max_length=128, blank=True), keep_default=False)
+        db.add_column('userpypi_release', 'signature', self.gf('django.db.models.fields.CharField')(default='', max_length=128, blank=True), keep_default=False)
 
         # Adding field 'Release.distribution'
-        db.add_column('djangopypi_release', 'distribution', self.gf('django.db.models.fields.files.FileField')(default='', max_length=100), keep_default=False)
+        db.add_column('userpypi_release', 'distribution', self.gf('django.db.models.fields.files.FileField')(default='', max_length=100), keep_default=False)
 
         # Deleting field 'Release.package'
-        db.delete_column('djangopypi_release', 'package_id')
+        db.delete_column('userpypi_release', 'package_id')
 
         # Deleting field 'Release.metadata_version'
-        db.delete_column('djangopypi_release', 'metadata_version')
+        db.delete_column('userpypi_release', 'metadata_version')
 
         # Deleting field 'Release.package_info'
-        db.delete_column('djangopypi_release', 'package_info')
+        db.delete_column('userpypi_release', 'package_info')
 
         # Deleting field 'Release.hidden'
-        db.delete_column('djangopypi_release', 'hidden')
+        db.delete_column('userpypi_release', 'hidden')
 
         # Deleting field 'Release.created'
-        db.delete_column('djangopypi_release', 'created')
+        db.delete_column('userpypi_release', 'created')
 
         # Adding unique constraint on 'Release', fields ['project', 'platform', 'distribution', 'version', 'pyversion']
-        db.create_unique('djangopypi_release', ['project_id', 'platform', 'distribution', 'version', 'pyversion'])
+        db.create_unique('userpypi_release', ['project_id', 'platform', 'distribution', 'version', 'pyversion'])
 
         # Removing unique constraint on 'Release', fields ['version', 'package']
-        db.delete_unique('djangopypi_release', ['version', 'package_id'])
+        db.delete_unique('userpypi_release', ['version', 'package_id'])
 
 
     models = {
@@ -245,11 +245,11 @@ class Migration(SchemaMigration):
             'model': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
             'name': ('django.db.models.fields.CharField', [], {'max_length': '100'})
         },
-        'djangopypi.classifier': {
+        'userpypi.classifier': {
             'Meta': {'object_name': 'Classifier'},
             'name': ('django.db.models.fields.CharField', [], {'max_length': '255', 'primary_key': 'True'})
         },
-        'djangopypi.distribution': {
+        'userpypi.distribution': {
             'Meta': {'unique_together': "(('release', 'filetype', 'pyversion'),)", 'object_name': 'Distribution'},
             'comment': ('django.db.models.fields.CharField', [], {'max_length': '255', 'blank': 'True'}),
             'content': ('django.db.models.fields.files.FileField', [], {'max_length': '100'}),
@@ -258,11 +258,11 @@ class Migration(SchemaMigration):
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'md5_digest': ('django.db.models.fields.CharField', [], {'max_length': '32', 'blank': 'True'}),
             'pyversion': ('django.db.models.fields.CharField', [], {'max_length': '16', 'blank': 'True'}),
-            'release': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'distributions'", 'to': "orm['djangopypi.Release']"}),
+            'release': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'distributions'", 'to': "orm['userpypi.Release']"}),
             'signature': ('django.db.models.fields.TextField', [], {'blank': 'True'}),
             'uploader': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['auth.User']"})
         },
-        'djangopypi.package': {
+        'userpypi.package': {
             'Meta': {'object_name': 'Package'},
             'allow_comments': ('django.db.models.fields.BooleanField', [], {'default': 'True', 'blank': 'True'}),
             'auto_hide': ('django.db.models.fields.BooleanField', [], {'default': 'True', 'blank': 'True'}),
@@ -270,23 +270,23 @@ class Migration(SchemaMigration):
             'name': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '255', 'primary_key': 'True'}),
             'owners': ('django.db.models.fields.related.ManyToManyField', [], {'symmetrical': 'False', 'related_name': "'packages_owned'", 'blank': 'True', 'to': "orm['auth.User']"})
         },
-        'djangopypi.release': {
+        'userpypi.release': {
             'Meta': {'unique_together': "(('package', 'version'),)", 'object_name': 'Release'},
             'created': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
             'hidden': ('django.db.models.fields.BooleanField', [], {'default': 'False', 'blank': 'True'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'metadata_version': ('django.db.models.fields.CharField', [], {'default': "'1.0'", 'max_length': '64'}),
-            'package': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'releases'", 'to': "orm['djangopypi.Package']"}),
-            'package_info': ('djangopypi.models.PackageInfoField', [], {}),
+            'package': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'releases'", 'to': "orm['userpypi.Package']"}),
+            'package_info': ('userpypi.models.PackageInfoField', [], {}),
             'version': ('django.db.models.fields.CharField', [], {'max_length': '128'})
         },
-        'djangopypi.review': {
+        'userpypi.review': {
             'Meta': {'object_name': 'Review'},
             'comment': ('django.db.models.fields.TextField', [], {'blank': 'True'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'rating': ('django.db.models.fields.PositiveSmallIntegerField', [], {'blank': 'True'}),
-            'release': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'reviews'", 'to': "orm['djangopypi.Release']"})
+            'release': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'reviews'", 'to': "orm['userpypi.Release']"})
         }
     }
 
-    complete_apps = ['djangopypi']
+    complete_apps = ['userpypi']

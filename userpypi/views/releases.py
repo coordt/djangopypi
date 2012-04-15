@@ -2,6 +2,7 @@ from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.forms.models import inlineformset_factory
 from django.http import Http404, HttpResponseRedirect
+from django.views.generic import ListView, DetailView, UpdateView
 from django.views.generic import list_detail, create_update
 from django.shortcuts import get_object_or_404, render_to_response
 from django.template import RequestContext
@@ -69,7 +70,7 @@ class ReleaseDetailView(OwnerObjectMixin, DetailView):
 
 
 @user_maintains_package()
-def manage(request, package, version, **kwargs):
+def manage(request, owner, package, version, **kwargs):
     kwargs.pop('owner')
     release = get_object_or_404(Package, owner=request.user, name=package).get_release(version)
     
@@ -86,7 +87,7 @@ def manage(request, package, version, **kwargs):
     return create_update.update_object(request, **kwargs)
 
 @user_maintains_package()
-def manage_metadata(request, package, version, **kwargs):
+def manage_metadata(request, owner, package, version, **kwargs):
     kwargs.pop('owner')
     kwargs.setdefault('template_name', 'userpypi/release_manage.html')
     kwargs.setdefault('template_object_name', 'release')

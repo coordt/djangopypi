@@ -42,7 +42,7 @@ History
 ----------------
 
 * Added DOAP views of packages and releases
-* Splitting djangopypi off of chishop
+* Splitting userpypi off of chishop
 * Switched most views to using django generic views
 
 Backwards incompatible changes

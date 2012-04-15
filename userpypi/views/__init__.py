@@ -1,11 +1,11 @@
 from django.http import HttpResponseNotAllowed
 
-from djangopypi.decorators import csrf_exempt
-from djangopypi.http import parse_distutils_request
-from djangopypi.models import Package, Release
-from djangopypi.views.xmlrpc import parse_xmlrpc_request
-from djangopypi.settings import (FALLBACK_VIEW, ACTION_VIEWS)
-from djangopypi.utils import get_class
+from userpypi.decorators import csrf_exempt
+from userpypi.http import parse_distutils_request
+from userpypi.models import Package, Release
+from userpypi.views.xmlrpc import parse_xmlrpc_request
+from userpypi.settings import (FALLBACK_VIEW, ACTION_VIEWS)
+from userpypi.utils import get_class
 
 @csrf_exempt
 def root(request, fallback_view=None, **kwargs):

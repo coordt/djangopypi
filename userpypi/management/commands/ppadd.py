@@ -18,7 +18,7 @@ from contextlib import contextmanager
 from urlparse import urlsplit
 from setuptools.package_index import PackageIndex
 from django.contrib.auth.models import User
-from djangopypi.models import Package, Release, Classifier
+from userpypi.models import Package, Release, Classifier
 
 
 
@@ -28,7 +28,7 @@ from djangopypi.models import Package, Release, Classifier
 def tempdir():
     """Simple context that provides a temporary directory that is deleted
     when the context is exited."""
-    d = tempfile.mkdtemp(".tmp", "djangopypi.")
+    d = tempfile.mkdtemp(".tmp", "userpypi.")
     yield d
     shutil.rmtree(d)
 

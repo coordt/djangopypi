@@ -11,7 +11,7 @@ except (IOError, OSError):
     reqs = ''
 
 setup(
-    name='djangopypi',
+    name='userpypi',
     version=userpypi.get_version(),
     description="A Django application that emulates the Python Package Index.",
     long_description=fread("README.rst")+"\n\n"+fread('Changelog.rst')+"\n\n"+fread('AUTHORS.rst'),

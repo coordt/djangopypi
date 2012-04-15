@@ -68,21 +68,21 @@ DEFAULT_SETTINGS = {
                 'requires_python','requires_external','project_url')
     },
     'METADATA_FORMS': {
-        '1.0': 'djangopypi.forms.Metadata10Form',
-        '1.1': 'djangopypi.forms.Metadata11Form',
-        '1.2': 'djangopypi.forms.Metadata12Form'
+        '1.0': 'userpypi.forms.Metadata10Form',
+        '1.1': 'userpypi.forms.Metadata11Form',
+        '1.2': 'userpypi.forms.Metadata12Form'
     },
-    'FALLBACK_VIEW': 'djangopypi.views.releases.index',
+    'FALLBACK_VIEW': 'userpypi.views.releases.index',
     'ACTION_VIEWS': {
-        "file_upload": 'djangopypi.views.distutils.register_or_upload', #``sdist`` command
-        "submit": 'djangopypi.views.distutils.register_or_upload', #``register`` command
-        "list_classifiers": 'djangopypi.views.distutils.list_classifiers', #``list_classifiers`` command
+        "file_upload": 'userpypi.views.distutils.register_or_upload', #``sdist`` command
+        "submit": 'userpypi.views.distutils.register_or_upload', #``register`` command
+        "list_classifiers": 'userpypi.views.distutils.list_classifiers', #``list_classifiers`` command
     },
     'XMLRPC_COMMANDS': {
-        'list_packages': 'djangopypi.views.xmlrpc.list_packages',
-        'package_releases': 'djangopypi.views.xmlrpc.package_releases',
-        'release_urls': 'djangopypi.views.xmlrpc.release_urls',
-        'release_data': 'djangopypi.views.xmlrpc.release_data',
+        'list_packages': 'userpypi.views.xmlrpc.list_packages',
+        'package_releases': 'userpypi.views.xmlrpc.package_releases',
+        'release_urls': 'userpypi.views.xmlrpc.release_urls',
+        'release_data': 'userpypi.views.xmlrpc.release_data',
         #'search': xmlrpc.search, Not done yet
         #'changelog': xmlrpc.changelog, Not done yet
         #'ratings': xmlrpc.ratings, Not done yet

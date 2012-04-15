@@ -13,7 +13,7 @@ except ImportError:
     def available_attrs(fn):
         return tuple(a for a in WRAPPER_ASSIGNMENTS if hasattr(fn, a))
 
-from djangopypi.http import HttpResponseUnauthorized, login_basic_auth
+from userpypi.http import HttpResponseUnauthorized, login_basic_auth
 
 # Find us a csrf exempt decorator that'll work with Django 1.0+
 try:
@@ -53,9 +53,11 @@ def user_owns_package(login_url=None, redirect_field_name=REDIRECT_FIELD_NAME):
         login_url = settings.LOGIN_URL
     
     def decorator(view_func):
-        def _wrapped_view(request, package, *args, **kwargs):
+        def _wrapped_view(request, owner, package, *args, **kwargs):
+            if request.user.username != owner:
+                return HttpResponseForbidden()
             if request.user.packages_owned.filter(name=package).count() > 0:
-                return view_func(request, package=package, *args, **kwargs)
+                return view_func(request, owner=owner, package=package, *args, **kwargs)
 
             path = urlquote(request.get_full_path())
             tup = login_url, redirect_field_name, path
@@ -73,11 +75,11 @@ def user_maintains_package(login_url=None, redirect_field_name=REDIRECT_FIELD_NA
         login_url = settings.LOGIN_URL
 
     def decorator(view_func):
-        def _wrapped_view(request, package, *args, **kwargs):
+        def _wrapped_view(request, owner, package, *args, **kwargs):
             if (request.user.is_authenticated() and
                 (request.user.packages_owned.filter(name=package).count() > 0 or
                  request.user.packages_maintained.filter(name=package).count() > 0)):
-                return view_func(request, package=package, *args, **kwargs)
+                return view_func(request, owner, package=package, *args, **kwargs)
 
             path = urlquote(request.get_full_path())
             tup = login_url, redirect_field_name, path

@@ -2,8 +2,8 @@ import os
 import unittest
 import xmlrpclib
 import StringIO
-#from djangopypi.views import parse_distutils_request, simple
-from djangopypi.models import Package, Classifier, Release, PackageInfoField, Distribution
+#from userpypi.views import parse_distutils_request, simple
+from userpypi.models import Package, Classifier, Release, PackageInfoField, Distribution
 from django.test.client import Client
 from django.core.urlresolvers import reverse
 from django.contrib.auth.models import User
@@ -112,7 +112,7 @@ class TestSearch(unittest.TestCase):
         self.dummy_user.delete()
     
     def test_search_for_package(self):
-        response = client.post(reverse('djangopypi-search'), {'search_term': 'foo'})
+        response = client.post(reverse('userpypi-search'), {'search_term': 'foo'})
         self.assertTrue("The quick brown fox jumps over the lazy dog." in response.content)
         
 class TestSimpleView(unittest.TestCase):

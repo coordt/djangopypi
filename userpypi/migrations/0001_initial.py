@@ -9,14 +9,14 @@ class Migration(SchemaMigration):
     def forwards(self, orm):
         
         # Adding model 'Classifier'
-        db.create_table('djangopypi_classifier', (
+        db.create_table('userpypi_classifier', (
             ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('name', self.gf('django.db.models.fields.CharField')(unique=True, max_length=255)),
         ))
-        db.send_create_signal('djangopypi', ['Classifier'])
+        db.send_create_signal('userpypi', ['Classifier'])
 
         # Adding model 'Project'
-        db.create_table('djangopypi_project', (
+        db.create_table('userpypi_project', (
             ('updated', self.gf('django.db.models.fields.DateTimeField')(auto_now=True, blank=True)),
             ('license', self.gf('django.db.models.fields.TextField')(blank=True)),
             ('metadata_version', self.gf('django.db.models.fields.CharField')(default=1.0, max_length=64)),
@@ -30,51 +30,51 @@ class Migration(SchemaMigration):
             ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('name', self.gf('django.db.models.fields.CharField')(unique=True, max_length=255)),
         ))
-        db.send_create_signal('djangopypi', ['Project'])
+        db.send_create_signal('userpypi', ['Project'])
 
         # Adding M2M table for field classifiers on 'Project'
-        db.create_table('djangopypi_project_classifiers', (
+        db.create_table('userpypi_project_classifiers', (
             ('id', models.AutoField(verbose_name='ID', primary_key=True, auto_created=True)),
-            ('project', models.ForeignKey(orm['djangopypi.project'], null=False)),
-            ('classifier', models.ForeignKey(orm['djangopypi.classifier'], null=False))
+            ('project', models.ForeignKey(orm['userpypi.project'], null=False)),
+            ('classifier', models.ForeignKey(orm['userpypi.classifier'], null=False))
         ))
-        db.create_unique('djangopypi_project_classifiers', ['project_id', 'classifier_id'])
+        db.create_unique('userpypi_project_classifiers', ['project_id', 'classifier_id'])
 
         # Adding model 'Release'
-        db.create_table('djangopypi_release', (
+        db.create_table('userpypi_release', (
             ('upload_time', self.gf('django.db.models.fields.DateTimeField')(auto_now=True, blank=True)),
             ('md5_digest', self.gf('django.db.models.fields.CharField')(max_length=255, blank=True)),
             ('filetype', self.gf('django.db.models.fields.CharField')(max_length=255, blank=True)),
             ('pyversion', self.gf('django.db.models.fields.CharField')(max_length=255, blank=True)),
-            ('project', self.gf('django.db.models.fields.related.ForeignKey')(related_name='releases', to=orm['djangopypi.Project'])),
+            ('project', self.gf('django.db.models.fields.related.ForeignKey')(related_name='releases', to=orm['userpypi.Project'])),
             ('platform', self.gf('django.db.models.fields.CharField')(max_length=255, blank=True)),
             ('version', self.gf('django.db.models.fields.CharField')(max_length=128)),
             ('signature', self.gf('django.db.models.fields.CharField')(max_length=128, blank=True)),
             ('distribution', self.gf('django.db.models.fields.files.FileField')(max_length=100)),
             ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
         ))
-        db.send_create_signal('djangopypi', ['Release'])
+        db.send_create_signal('userpypi', ['Release'])
 
         # Adding unique constraint on 'Release', fields ['project', 'version', 'platform', 'distribution', 'pyversion']
-        db.create_unique('djangopypi_release', ['project_id', 'version', 'platform', 'distribution', 'pyversion'])
+        db.create_unique('userpypi_release', ['project_id', 'version', 'platform', 'distribution', 'pyversion'])
     
     
     def backwards(self, orm):
         
         # Deleting model 'Classifier'
-        db.delete_table('djangopypi_classifier')
+        db.delete_table('userpypi_classifier')
 
         # Deleting model 'Project'
-        db.delete_table('djangopypi_project')
+        db.delete_table('userpypi_project')
 
         # Removing M2M table for field classifiers on 'Project'
-        db.delete_table('djangopypi_project_classifiers')
+        db.delete_table('userpypi_project_classifiers')
 
         # Deleting model 'Release'
-        db.delete_table('djangopypi_release')
+        db.delete_table('userpypi_release')
 
         # Removing unique constraint on 'Release', fields ['project', 'version', 'platform', 'distribution', 'pyversion']
-        db.delete_unique('djangopypi_release', ['project_id', 'version', 'platform', 'distribution', 'pyversion'])
+        db.delete_unique('userpypi_release', ['project_id', 'version', 'platform', 'distribution', 'pyversion'])
     
     
     models = {
@@ -114,16 +114,16 @@ class Migration(SchemaMigration):
             'model': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
             'name': ('django.db.models.fields.CharField', [], {'max_length': '100'})
         },
-        'djangopypi.classifier': {
+        'userpypi.classifier': {
             'Meta': {'object_name': 'Classifier'},
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'name': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '255'})
         },
-        'djangopypi.project': {
+        'userpypi.project': {
             'Meta': {'object_name': 'Project'},
             'author': ('django.db.models.fields.CharField', [], {'max_length': '128', 'blank': 'True'}),
             'author_email': ('django.db.models.fields.CharField', [], {'max_length': '255', 'blank': 'True'}),
-            'classifiers': ('django.db.models.fields.related.ManyToManyField', [], {'to': "orm['djangopypi.Classifier']"}),
+            'classifiers': ('django.db.models.fields.related.ManyToManyField', [], {'to': "orm['userpypi.Classifier']"}),
             'description': ('django.db.models.fields.TextField', [], {'blank': 'True'}),
             'download_url': ('django.db.models.fields.CharField', [], {'max_length': '200', 'null': 'True', 'blank': 'True'}),
             'home_page': ('django.db.models.fields.URLField', [], {'max_length': '200', 'null': 'True', 'blank': 'True'}),
@@ -135,14 +135,14 @@ class Migration(SchemaMigration):
             'summary': ('django.db.models.fields.TextField', [], {'blank': 'True'}),
             'updated': ('django.db.models.fields.DateTimeField', [], {'auto_now': 'True', 'blank': 'True'})
         },
-        'djangopypi.release': {
+        'userpypi.release': {
             'Meta': {'unique_together': "(('project', 'version', 'platform', 'distribution', 'pyversion'),)", 'object_name': 'Release'},
             'distribution': ('django.db.models.fields.files.FileField', [], {'max_length': '100'}),
             'filetype': ('django.db.models.fields.CharField', [], {'max_length': '255', 'blank': 'True'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'md5_digest': ('django.db.models.fields.CharField', [], {'max_length': '255', 'blank': 'True'}),
             'platform': ('django.db.models.fields.CharField', [], {'max_length': '255', 'blank': 'True'}),
-            'project': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'releases'", 'to': "orm['djangopypi.Project']"}),
+            'project': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'releases'", 'to': "orm['userpypi.Project']"}),
             'pyversion': ('django.db.models.fields.CharField', [], {'max_length': '255', 'blank': 'True'}),
             'signature': ('django.db.models.fields.CharField', [], {'max_length': '128', 'blank': 'True'}),
             'upload_time': ('django.db.models.fields.DateTimeField', [], {'auto_now': 'True', 'blank': 'True'}),
@@ -150,4 +150,4 @@ class Migration(SchemaMigration):
         }
     }
     
-    complete_apps = ['djangopypi']
+    complete_apps = ['userpypi']

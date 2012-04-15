@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from django.conf.urls.defaults import patterns, url
 from userpypi.feeds import ReleaseFeed
+from userpypi.decorators import user_owns_package
 
 from .views.packages import PackageListView, PackageDetailView, PackageManageView
 from .views.releases import ReleaseDetailView
@@ -16,7 +17,7 @@ urlpatterns = patterns('',
         name='userpypi-package-index'),
     
     url(r'^(?P<owner>[^/]+)/search/$',
-        'packages.search',
+        'userpypi.views.packages.search',
         name='userpypi-search'),
     url(r'^(?P<owner>[^/]+)/rss/$', 
         ReleaseFeed(), 
@@ -44,7 +45,7 @@ urlpatterns = patterns('',
         PackageDetailView.as_view(doap=True),
         name='userpypi-package-doap'),
     url(r'^(?P<owner>[^/]+)/pypi/(?P<package>[\w\d_\.\-]+)/manage/$',
-        PackageManageView.as_view(),
+        user_owns_package()(PackageManageView.as_view()),
         name='userpypi-package-manage'),
     url(r'^pypi/(?P<package>[\w\d_\.\-]+)/manage/versions/$',
         'userpypi.views.packages.manage_versions',

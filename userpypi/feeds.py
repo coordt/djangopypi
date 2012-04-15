@@ -17,7 +17,7 @@ except ImportError:
             feedgen.write(response, 'utf-8')
             return response
 
-from djangopypi.models import Package, Release
+from userpypi.models import Package, Release
 
 
 

@@ -7,10 +7,10 @@ from django.utils.translation import ugettext_lazy as _
 from django.utils.datastructures import MultiValueDict
 from django.contrib.auth import login
 
-from djangopypi.decorators import basic_auth
-from djangopypi.forms import PackageForm, ReleaseForm
-from djangopypi.models import Package, Release, Distribution, Classifier
-from djangopypi.settings import (ALLOW_VERSION_OVERWRITE, METADATA_FIELDS, RELEASE_UPLOAD_TO)
+from userpypi.decorators import basic_auth
+from userpypi.forms import PackageForm, ReleaseForm
+from userpypi.models import Package, Release, Distribution, Classifier
+from userpypi.settings import (ALLOW_VERSION_OVERWRITE, METADATA_FIELDS, RELEASE_UPLOAD_TO)
 
 
 ALREADY_EXISTS_FMT = _(
