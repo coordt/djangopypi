@@ -1,16 +1,19 @@
 import sys, traceback
+from django.conf import settings
 from django.utils.importlib import import_module
 from django.core.exceptions import ImproperlyConfigured
 
 def debug(func):
     # @debug is handy when debugging distutils requests
-    def _wrapped(*args, **kwargs):
-        try:
-            return func(*args, **kwargs)
-        except:
-            traceback.print_exception(*sys.exc_info())
-    return _wrapped
-
+    if settings.DEBUG:
+        def _wrapped(*args, **kwargs):
+            try:
+                return func(*args, **kwargs)
+            except:
+                traceback.print_exception(*sys.exc_info())
+        return _wrapped
+    else:
+        return func
 
 def get_class(import_path):
     try:

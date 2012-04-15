@@ -5,9 +5,10 @@ from userpypi.http import parse_distutils_request
 from userpypi.models import Package, Release
 from userpypi.views.xmlrpc import parse_xmlrpc_request
 from userpypi.settings import (FALLBACK_VIEW, ACTION_VIEWS)
-from userpypi.utils import get_class
+from userpypi.utils import get_class, debug
 
 @csrf_exempt
+@debug
 def root(request, fallback_view=None, **kwargs):
     """ Root view of the package index, handle incoming actions from distutils
     or redirect to a more user friendly view """
