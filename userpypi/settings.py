@@ -72,7 +72,7 @@ DEFAULT_SETTINGS = {
         '1.1': 'userpypi.forms.Metadata11Form',
         '1.2': 'userpypi.forms.Metadata12Form'
     },
-    'FALLBACK_VIEW': 'userpypi.views.releases.index',
+    'FALLBACK_VIEW': 'userpypi.views.releases.ReleaseListView',
     'ACTION_VIEWS': {
         "file_upload": 'userpypi.views.distutils.register_or_upload', #``sdist`` command
         "submit": 'userpypi.views.distutils.register_or_upload', #``register`` command
