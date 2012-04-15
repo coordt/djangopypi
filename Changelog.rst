@@ -1,6 +1,12 @@
 History
 =======
 
+0.5 (2012-04)
+-------------
+
+* Renamed fork to userpypi
+* Added multi-user support with private indexes
+
 0.4.3 (2011-02-22)
 ------------------
 

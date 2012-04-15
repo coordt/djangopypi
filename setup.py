@@ -1,14 +1,18 @@
 import os
 from setuptools import setup, find_packages
+import userpypi
 
 def fread(fname):
     return open(os.path.join(os.path.dirname(__file__), fname)).read()
 
-version = '0.4.4b5'
+try:
+    reqs = open(os.path.join(os.path.dirname(__file__), 'requirements.txt')).read()
+except (IOError, OSError):
+    reqs = ''
 
 setup(
     name='djangopypi',
-    version=version,
+    version=userpypi.get_version(),
     description="A Django application that emulates the Python Package Index.",
     long_description=fread("README.rst")+"\n\n"+fread('Changelog.rst')+"\n\n"+fread('AUTHORS.rst'),
     classifiers=[
@@ -35,8 +39,5 @@ setup(
     packages=find_packages(),
     include_package_data=True,
     zip_safe=False,
-    install_requires=[
-        'setuptools',
-        'docutils',
-    ],
+    install_requires=reqs,
 )

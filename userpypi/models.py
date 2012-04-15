@@ -6,7 +6,7 @@ from django.utils import simplejson as json
 from django.utils.datastructures import MultiValueDict
 from django.contrib.auth.models import User
 
-from djangopypi.settings import (RELEASE_UPLOAD_TO, DIST_FILE_TYPES, 
+from userpypi.settings import (RELEASE_UPLOAD_TO, DIST_FILE_TYPES, 
     PYTHON_VERSIONS, DIST_FILE_TYPES, RELEASE_FILE_STORAGE)
 
 from django.core.files.storage import get_storage_class
@@ -53,17 +53,20 @@ class Classifier(models.Model):
         verbose_name = _(u"classifier")
         verbose_name_plural = _(u"classifiers")
         ordering = ('name',)
-
+        
     def __unicode__(self):
         return self.name
+
 
 class Package(models.Model):
     owner = models.ForeignKey(User, related_name="packages_owned")
     name = models.CharField(max_length=255)
     auto_hide = models.BooleanField(default=True, blank=False)
-    # allow_comments = models.BooleanField(default=True, blank=False)
-    maintainers = models.ManyToManyField(User, blank=True,
-                                         related_name="packages_maintained")
+    maintainers = models.ManyToManyField(
+        User, 
+        blank=True,
+        related_name="packages_maintained",
+        through=Maintainer)
     private = models.BooleanField(default=True)
 
     class Meta:
@@ -78,7 +81,10 @@ class Package(models.Model):
 
     @models.permalink
     def get_absolute_url(self):
-        return ('djangopypi-package', (), {'package': self.name})
+        return ('userpypi-package', (), {
+            'owner': self.owner.username, 
+            'package': self.name
+        })
 
     @property
     def latest(self):
@@ -93,6 +99,12 @@ class Package(models.Model):
             return self.releases.get(version=version)
         except Release.DoesNotExist:
             return None
+
+class Maintainer(models.Model):
+    package = models.ForeignKey(Package)
+    user = models.ForeignKey(User)
+    permission = models.BigIntegerField(blank=True, null=True)
+
 
 class Release(models.Model):
     package = models.ForeignKey(Package, related_name="releases", editable=False)
@@ -130,8 +142,11 @@ class Release(models.Model):
 
     @models.permalink
     def get_absolute_url(self):
-        return ('djangopypi-release', (), {'package': self.package.name,
-                                           'version': self.version})
+        return ('userpypi-release', (), {
+            'owner': selfpackage.owner.username,
+            'package': self.package.name,
+            'version': self.version
+        })
 
 
 class Distribution(models.Model):
@@ -174,18 +189,10 @@ class Distribution(models.Model):
     def __unicode__(self):
         return self.filename
 
-class Review(models.Model):
-    release = models.ForeignKey(Release, related_name="reviews")
-    rating = models.PositiveSmallIntegerField(blank=True)
-    comment = models.TextField(blank=True)
-
-    class Meta:
-        verbose_name = _(u'release review')
-        verbose_name_plural = _(u'release reviews')
 
 try:
     from south.modelsinspector import add_introspection_rules
-    add_introspection_rules([], ["^djangopypi\.models\.PackageInfoField"])
+    add_introspection_rules([], ["^userpypi\.models\.PackageInfoField"])
 except ImportError:
     pass
 

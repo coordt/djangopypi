@@ -6,45 +6,71 @@ from django.views.generic import list_detail, create_update
 from django.shortcuts import get_object_or_404, render_to_response
 from django.template import RequestContext
 
-from djangopypi.decorators import user_owns_package, user_maintains_package
-from djangopypi.models import Package, Release, Distribution
-from djangopypi.forms import ReleaseForm, DistributionUploadForm
-from djangopypi.settings import METADATA_FORMS
-from djangopypi.utils import get_class
+from userpypi.decorators import user_owns_package, user_maintains_package
+from userpypi.models import Package, Release, Distribution
+from userpypi.forms import ReleaseForm, DistributionUploadForm
+from userpypi.settings import METADATA_FORMS
+from userpypi.utils import get_class
+from userpypi.views.packages import OwnerObjectMixin
 
-def index(request, **kwargs):
-    kwargs.setdefault('template_object_name','release')
-    params = dict(package__owner=request.user, hidden=False)
-    kwargs.setdefault('queryset', Release.objects.filter(**params))
-    kwargs.pop('username')
-    return list_detail.object_list(request, **kwargs)
-
-def details(request, package, version, **kwargs):
-    release = get_object_or_404(Package, owner=request.user, name=package).get_release(version)
+class ReleaseListView(OwnerObjectMixin, ListView):
+    model = Release
+    context_object_name = 'release_list'
+    simple = False
+    owner = None
     
-    if not release:
-        raise Http404('Version %s does not exist for %s' % (version,
-                                                            package,))
-    
-    kwargs.setdefault('template_object_name', 'release')
-    kwargs.setdefault('template_name', 'djangopypi/release_detail.html')
-    kwargs.setdefault('extra_context', {})
-    kwargs.setdefault('mimetype',settings.DEFAULT_CONTENT_TYPE)
-    
-    kwargs['extra_context'][kwargs['template_object_name']] = release
+    def get_template_names(self):
+        """
+        Returns a list of template names to be used for the request. Must return
+        a list. May not be called if render_to_response is overridden.
+        """
+        if self.simple:
+            return ['userpypi/release_list_simple.html']
+        else:
+            return ['userpypi/release_list.html']
         
-    return render_to_response(kwargs['template_name'], kwargs['extra_context'],
-                              context_instance=RequestContext(request),
-                              mimetype=kwargs['mimetype'])
 
-def doap(request, package, version, **kwargs):
-    kwargs.setdefault('template_name','djangopypi/release_doap.xml')
-    kwargs.setdefault('mimetype', 'text/xml')
-    return details(request, package, version, **kwargs)
+class ReleaseDetailView(OwnerObjectMixin, DetailView):
+    model = Release
+    context_object_name = 'release'
+    doap = False
+    owner = None
+    
+    def render_to_response(self, context, **response_kwargs):
+        """
+        Returns a response with a template rendered with the given context.
+        """
+        if self.doap:
+            response_kwargs['mimetype'] = 'text/xml'
+        
+        return super(ReleaseDetailView, self).render_to_response(context, **response_kwargs)
+    
+    def get_object(self):
+        package = self.kwargs.get('package', None)
+        try:
+            queryset = self.get_queryset().filter(package__name=package)
+            obj = queryset.get()
+        except ObjectDoesNotExist:
+            raise Http404(_(u"No %(verbose_name)s found matching the query") %
+                          {'verbose_name': queryset.model._meta.verbose_name})
+        return obj
+    
+    def get_template_names(self):
+        """
+        Returns a list of template names to be used for the request. Must return
+        a list. May not be called if render_to_response is overridden.
+        """
+        self.doap = 'doap' in self.kwargs and self.kwargs['doap']
+        
+        if self.doap:
+            return ['userpypi/release_doap.xml']
+        else:
+            return ['userpypi/release_detail.html']
+
 
 @user_maintains_package()
 def manage(request, package, version, **kwargs):
-    kwargs.pop('username')
+    kwargs.pop('owner')
     release = get_object_or_404(Package, owner=request.user, name=package).get_release(version)
     
     if not release:
@@ -54,15 +80,15 @@ def manage(request, package, version, **kwargs):
     kwargs['object_id'] = release.pk
     
     kwargs.setdefault('form_class', ReleaseForm)
-    kwargs.setdefault('template_name', 'djangopypi/release_manage.html')
+    kwargs.setdefault('template_name', 'userpypi/release_manage.html')
     kwargs.setdefault('template_object_name', 'release')
     
     return create_update.update_object(request, **kwargs)
 
 @user_maintains_package()
 def manage_metadata(request, package, version, **kwargs):
-    kwargs.pop('username')
-    kwargs.setdefault('template_name', 'djangopypi/release_manage.html')
+    kwargs.pop('owner')
+    kwargs.setdefault('template_name', 'userpypi/release_manage.html')
     kwargs.setdefault('template_object_name', 'release')
     kwargs.setdefault('extra_context', {})
     kwargs.setdefault('mimetype', settings.DEFAULT_CONTENT_TYPE)
@@ -125,7 +151,7 @@ def manage_files(request, package, version, **kwargs):
     kwargs['formset_factory_kwargs']['extra'] = 0
     
     kwargs.setdefault('formset_factory', inlineformset_factory(Release, Distribution, **kwargs['formset_factory_kwargs']))
-    kwargs.setdefault('template_name', 'djangopypi/release_manage_files.html')
+    kwargs.setdefault('template_name', 'userpypi/release_manage_files.html')
     kwargs.setdefault('template_object_name', 'release')
     kwargs.setdefault('extra_context',{})
     kwargs.setdefault('mimetype',settings.DEFAULT_CONTENT_TYPE)
@@ -161,10 +187,10 @@ def upload_file(request, package, version, **kwargs):
                                                             package,))
     
     kwargs.setdefault('form_factory', DistributionUploadForm)
-    kwargs.setdefault('post_save_redirect', reverse('djangopypi-release-manage-files',
+    kwargs.setdefault('post_save_redirect', reverse('userpypi-release-manage-files',
                                                     kwargs={'package': package,
                                                             'version': version}))
-    kwargs.setdefault('template_name', 'djangopypi/release_upload_file.html')
+    kwargs.setdefault('template_name', 'userpypi/release_upload_file.html')
     kwargs.setdefault('template_object_name', 'release')
     kwargs.setdefault('extra_context',{})
     kwargs.setdefault('mimetype',settings.DEFAULT_CONTENT_TYPE)
