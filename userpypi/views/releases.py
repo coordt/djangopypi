@@ -12,9 +12,29 @@ from userpypi.models import Package, Release, Distribution
 from userpypi.forms import ReleaseForm, DistributionUploadForm
 from userpypi.settings import METADATA_FORMS
 from userpypi.utils import get_class
-from userpypi.views.packages import OwnerObjectMixin
 
-class ReleaseListView(OwnerObjectMixin, ListView):
+class ReleaseOwnerObjectMixin(object):
+    def get_context_data(self, **kwargs):
+        context = super(ReleaseOwnerObjectMixin, self).get_context_data(**kwargs)
+        context['owner'] = self.kwargs.get('owner', None)
+        context['is_owner'] = self.owner == self.request.user.username
+        return context
+    
+    def get_queryset(self):
+        """
+        Filter the queryset based on whether or not the requesting user is
+        the owner of the requested objects
+        """
+        self.owner = self.kwargs['owner']
+        
+        if self.request.user.username != self.owner:
+            params = dict(package__owner__username=self.owner, package__private=False)
+        else:
+            params = dict(package__owner=self.request.user)
+        return self.model.objects.filter(**params)
+
+
+class ReleaseListView(ReleaseOwnerObjectMixin, ListView):
     model = Release
     context_object_name = 'release_list'
     simple = False
@@ -31,7 +51,7 @@ class ReleaseListView(OwnerObjectMixin, ListView):
             return ['userpypi/release_list.html']
         
 
-class ReleaseDetailView(OwnerObjectMixin, DetailView):
+class ReleaseDetailView(ReleaseOwnerObjectMixin, DetailView):
     model = Release
     context_object_name = 'release'
     doap = False

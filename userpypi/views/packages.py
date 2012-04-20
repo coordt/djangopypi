@@ -30,7 +30,7 @@ class OwnerObjectMixin(object):
         self.owner = self.kwargs['owner']
         
         if self.request.user.username != self.owner:
-            params = dict(owner__owner=self.owner, private=False)
+            params = dict(owner__username=self.owner, private=False)
         else:
             params = dict(owner=self.request.user)
         return self.model.objects.filter(**params)
@@ -91,9 +91,6 @@ class PackageDetailView(OwnerObjectMixin, DetailView):
         Returns a list of template names to be used for the request. Must 
         return a list. May not be called if render_to_response is overridden.
         """
-        self.doap = 'doap' in self.kwargs and self.kwargs['doap']
-        self.simple = 'simple' in self.kwargs and self.kwargs['simple']
-        
         if self.simple:
             return ['userpypi/package_detail_simple.html']
         elif self.doap:

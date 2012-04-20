@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 from django.conf.urls.defaults import patterns, url
 from userpypi.feeds import ReleaseFeed
-from userpypi.decorators import user_owns_package
+from userpypi.decorators import user_owns_package, basic_auth
 
 from .views.packages import PackageListView, PackageDetailView, PackageManageView
-from .views.releases import ReleaseDetailView
+from .views.releases import ReleaseDetailView, ReleaseListView
 
 urlpatterns = patterns('',
 
@@ -15,6 +15,9 @@ urlpatterns = patterns('',
     url(r'^(?P<owner>[^/]+)/packages/$',
         PackageListView.as_view(), 
         name='userpypi-package-index'),
+    url(r'^(?P<owner>[^/]+)/pypi/releases/$',
+        ReleaseListView.as_view(),
+        name='userpypi-release-list'),
     
     url(r'^(?P<owner>[^/]+)/search/$',
         'userpypi.views.packages.search',
@@ -25,18 +28,18 @@ urlpatterns = patterns('',
     
     # Simple indexes
     url(r'^(?P<owner>[^/]+)/simple/$',
-        PackageListView.as_view(simple=True),
+        basic_auth(PackageListView.as_view(simple=True)),
         name='userpypi-package-index-simple'),
-    url(r'^(?P<owner>[^/]+)/simple/(?P<package>[\w\d_\.\-]+)/$',
-        PackageDetailView.as_view(simple=True),
+    url(r'^(?P<owner>[^/]+)/simple/(?P<package>[\w\d_\.\-]+)/?$',
+        basic_auth(PackageDetailView.as_view(simple=True)),
         name='userpypi-package-simple'),
     
     # Regular Package Indexes
     url(r'^(?P<owner>[^/]+)/pypi/$', 
         'userpypi.views.root', 
         name="userpypi-root"),
-    url(r'^(?P<owner>[^/]+)/pypi/(?P<package>[\w\d_\.\-]+)/$',
-        PackageDetailView.as_view(),
+    url(r'^(?P<owner>[^/]+)/pypi/(?P<package>[\w\d_\.\-]+)/?$',
+        basic_auth(PackageDetailView.as_view()),
         name='userpypi-package'),
     url(r'^(?P<owner>[^/]+)/pypi/(?P<package>[\w\d_\.\-]+)/rss/$', 
         ReleaseFeed(),
