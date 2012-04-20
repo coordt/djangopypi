@@ -59,11 +59,15 @@ class PackageDetailView(OwnerObjectMixin, DetailView):
     simple = False
     doap = False
     owner = None
+    redirect = ''
     
     def render_to_response(self, context, **response_kwargs):
         """
         Returns a response with a template rendered with the given context.
         """
+        if self.redirect:
+            return HttpResponseRedirect(self.redirect)
+        
         self.doap = 'doap' in self.kwargs and self.kwargs['doap']
         
         if self.doap:
@@ -79,9 +83,8 @@ class PackageDetailView(OwnerObjectMixin, DetailView):
             obj = queryset.get()
         except ObjectDoesNotExist:
             if PROXY_MISSING:
-                return HttpResponseRedirect('%s/%s/' % 
-                                            (PROXY_BASE_URL.rstrip('/'),
-                                             package))
+                self.redirect = '%s/%s/' % (PROXY_BASE_URL.rstrip('/'), package)
+                return None
             raise Http404(u"No %(verbose_name)s found matching the query" %
                           {'verbose_name': queryset.model._meta.verbose_name})
         return obj
