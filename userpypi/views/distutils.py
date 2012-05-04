@@ -65,7 +65,7 @@ def submit_package_or_release(user, post_data, files):
 
 @basic_auth
 @transaction.commit_manually
-def register_or_upload(request, username=None):
+def register_or_upload(request, owner=None):
     if request.method != 'POST':
         transaction.rollback()
         return HttpResponseBadRequest('Only post requests are supported')
