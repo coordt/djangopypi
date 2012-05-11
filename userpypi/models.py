@@ -107,7 +107,7 @@ class Package(models.Model):
 class Maintainer(models.Model):
     package = models.ForeignKey(Package)
     user = models.ForeignKey(User)
-    permission = models.BigIntegerField(blank=True, null=True)
+    permission = models.BigIntegerField(choices=enumerate(['Read Only', 'Read and Write']))
 
 
 class Release(models.Model):

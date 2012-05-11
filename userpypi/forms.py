@@ -3,19 +3,50 @@ from os.path import basename
 from django import forms
 from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
+from django.forms.models import inlineformset_factory
 
-from userpypi.settings import (ALLOW_VERSION_OVERWRITE, METADATA_FIELDS, )
-from userpypi.models import Package, Classifier, Release, Distribution
+from userpypi.settings import ALLOW_VERSION_OVERWRITE, METADATA_FIELDS
+from userpypi.models import (Package, Classifier, Release, Distribution, 
+                             Maintainer)
 
+from django.contrib.auth.models import User
+from selectable.base import ModelLookup
+from selectable.forms import AutoCompleteSelectField
+from selectable.registry import registry
 
+class UserLookup(ModelLookup):
+    model = User
+    search_fields = (
+        'username__icontains',
+        'first_name__icontains',
+        'last_name__icontains',
+    )
+    filters = {'is_active': True, }
+
+    def get_item_value(self, item):
+        # Display for currently selected item
+        return item.username
+
+    def get_item_label(self, item):
+        # Display for choice listings
+        return u"%s (%s)" % (item.username, item.get_full_name())
+registry.register(UserLookup)
 
 class SimplePackageSearchForm(forms.Form):
     query = forms.CharField(max_length=255)
 
+class MaintainerForm(forms.ModelForm):
+    user = AutoCompleteSelectField(lookup_class=UserLookup)
+    
+    class Meta:
+        model = Maintainer
+
+MaintainerFormSet = inlineformset_factory(Package, Maintainer, form=MaintainerForm)
+
 class PackageForm(forms.ModelForm):
     class Meta:
         model = Package
-        exclude = ['name', 'owner', 'private']
+        exclude = ['name', 'owner', 'private', 'maintainers']
 
 class DistributionUploadForm(forms.ModelForm):
     class Meta:
@@ -26,7 +57,6 @@ class DistributionUploadForm(forms.ModelForm):
         content = self.cleaned_data['content']
         storage = self.instance.content.storage
         field = self.instance.content.field
-        
         name = field.generate_filename(instance=self.instance,
                                        filename=content.name)
         
@@ -40,11 +70,12 @@ class DistributionUploadForm(forms.ModelForm):
         raise forms.ValidationError('That distribution already exists, please '
                                     'delete it first before uploading a new '
                                     'version.')
-        
+
 
 class ReleaseForm(forms.ModelForm):
-    metadata_version = forms.CharField(widget=forms.Select(choices=zip(METADATA_FIELDS.keys(),
-                                                                       METADATA_FIELDS.keys())))
+    metadata_version = forms.CharField(
+        widget=forms.Select(choices=zip(METADATA_FIELDS.keys(),
+                                        METADATA_FIELDS.keys())))
     
     class Meta:
         model = Release

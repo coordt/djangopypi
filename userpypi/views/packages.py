@@ -10,7 +10,7 @@ from django.views.generic import ListView, DetailView, UpdateView, create_update
 
 from userpypi.decorators import user_owns_package, user_maintains_package
 from userpypi.models import Package, Release
-from userpypi.forms import SimplePackageSearchForm, PackageForm
+from userpypi.forms import SimplePackageSearchForm, PackageForm, MaintainerFormSet
 from django.views.generic import ListView, DetailView, UpdateView
 from userpypi.settings import PROXY_MISSING, PROXY_BASE_URL
 
@@ -110,6 +110,14 @@ class PackageManageView(OwnerObjectMixin, UpdateView):
     
     def dispatch(self, *args, **kwargs):
         return super(PackageManageView, self).dispatch(*args, **kwargs)
+    
+    def get(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        form_class = self.get_form_class()
+        form = self.get_form(form_class)
+        maintainer_formset = MaintainerFormSet(instance=self.object)
+        return self.render_to_response(self.get_context_data(
+            form=form, maintainer_formset=maintainer_formset))
     
     def get_object(self):
         package = self.kwargs.get('package', None)

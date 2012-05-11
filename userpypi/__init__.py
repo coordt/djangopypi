@@ -4,9 +4,9 @@ UserPyPI: A Python package index for individual users.
 __version_info__ = {
     'major': 0,
     'minor': 5,
-    'micro': 1,
-    'releaselevel': 'final',
-    'serial': 1
+    'micro': 2,
+    'releaselevel': 'beta',
+    'serial': 3
 }
 
 def get_version(short=False):
