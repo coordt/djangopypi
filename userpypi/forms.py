@@ -40,13 +40,18 @@ class MaintainerForm(forms.ModelForm):
     
     class Meta:
         model = Maintainer
-
-MaintainerFormSet = inlineformset_factory(Package, Maintainer, form=MaintainerForm)
+MaintainerFormSet = inlineformset_factory(Package, Maintainer, 
+                                          form=MaintainerForm, extra=0)
 
 class PackageForm(forms.ModelForm):
     class Meta:
         model = Package
-        exclude = ['name', 'owner', 'private', 'maintainers']
+        exclude = ['maintainers']
+        widgets = {
+            'owner': forms.HiddenInput,
+            'name': forms.HiddenInput,
+            'private': forms.HiddenInput
+        }
 
 class DistributionUploadForm(forms.ModelForm):
     class Meta:

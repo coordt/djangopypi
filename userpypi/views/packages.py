@@ -1,12 +1,13 @@
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models.query import Q
-from django.http import Http404, HttpResponseRedirect
+from django.http import Http404, HttpResponseRedirect, HttpResponse
 from django.forms.models import inlineformset_factory
 from django.shortcuts import get_object_or_404, render_to_response
-from django.template import RequestContext
+from django.template import RequestContext, loader
 from django.utils.decorators import method_decorator
 from django.views.generic import ListView, DetailView, UpdateView, create_update
+from django.core.urlresolvers import reverse
 
 from userpypi.decorators import user_owns_package, user_maintains_package
 from userpypi.models import Package, Release
@@ -101,33 +102,37 @@ class PackageDetailView(OwnerObjectMixin, DetailView):
         else:
             return ['userpypi/package_detail.html']
 
+@user_maintains_package()
+def manage(request, owner, package):
+    """
+    """
+    template_name='userpypi/package_manage.html'
+    template_object_name='package'
+    form_class=PackageForm
+    obj = get_object_or_404(Package, owner__username=owner, name=package)
+    
+    if request.method == 'POST':
+        form = PackageForm(request.POST, instance=obj)
+        if form.is_valid():
+            obj = form.save(commit=False)
+            maintainer_formset = MaintainerFormSet(request.POST, instance=obj)
+            if maintainer_formset.is_valid():
+                obj.save()
+                maintainer_formset.save()
+                return HttpResponseRedirect(reverse('userpypi-package-manage', kwargs={'owner': owner, 'package': obj}))
+    else:
+        form = PackageForm(instance=obj)
+        maintainer_formset = MaintainerFormSet(instance=obj)
+    
+    t = loader.get_template(template_name)
+    c = RequestContext(request, {
+        'form': form,
+        'maintainer_formset': maintainer_formset,
+        'package': obj,
+    })
+    response = HttpResponse(t.render(c))
+    return response
 
-class PackageManageView(OwnerObjectMixin, UpdateView):
-    model = Package
-    form_class = PackageForm
-    context_object_name = 'package'
-    template_name = 'userpypi/package_manage.html'
-    
-    def dispatch(self, *args, **kwargs):
-        return super(PackageManageView, self).dispatch(*args, **kwargs)
-    
-    def get(self, request, *args, **kwargs):
-        self.object = self.get_object()
-        form_class = self.get_form_class()
-        form = self.get_form(form_class)
-        maintainer_formset = MaintainerFormSet(instance=self.object)
-        return self.render_to_response(self.get_context_data(
-            form=form, maintainer_formset=maintainer_formset))
-    
-    def get_object(self):
-        package = self.kwargs.get('package', None)
-        try:
-            queryset = self.get_queryset().filter(name=package)
-            obj = queryset.get()
-        except ObjectDoesNotExist:
-            raise Http404(u"No %(verbose_name)s found matching the query" %
-                          {'verbose_name': queryset.model._meta.verbose_name})
-        return obj
 
 def search(request, **kwargs):
     if request.method == 'POST':

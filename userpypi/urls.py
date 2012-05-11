@@ -3,7 +3,8 @@ from django.conf.urls.defaults import patterns, url
 from userpypi.feeds import ReleaseFeed
 from userpypi.decorators import user_owns_package, basic_auth
 
-from .views.packages import PackageListView, PackageDetailView, PackageManageView
+from .views.packages import (PackageListView, PackageDetailView, 
+                             PackageManageView, manage)
 from .views.releases import ReleaseDetailView, ReleaseListView
 
 urlpatterns = patterns('',
@@ -48,7 +49,7 @@ urlpatterns = patterns('',
         PackageDetailView.as_view(doap=True),
         name='userpypi-package-doap'),
     url(r'^(?P<owner>[^/]+)/pypi/(?P<package>[\w\d_\.\-]+)/manage/$',
-        user_owns_package()(PackageManageView.as_view()),
+        manage,
         name='userpypi-package-manage'),
     url(r'^pypi/(?P<package>[\w\d_\.\-]+)/manage/versions/$',
         'userpypi.views.packages.manage_versions',
