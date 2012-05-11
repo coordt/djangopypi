@@ -3,8 +3,7 @@ from django.conf.urls.defaults import patterns, url
 from userpypi.feeds import ReleaseFeed
 from userpypi.decorators import user_owns_package, basic_auth
 
-from .views.packages import (PackageListView, PackageDetailView, 
-                             PackageManageView, manage)
+from .views.packages import PackageListView, PackageDetailView, manage
 from .views.releases import ReleaseDetailView, ReleaseListView
 
 urlpatterns = patterns('',
