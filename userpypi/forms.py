@@ -41,7 +41,7 @@ class MaintainerForm(forms.ModelForm):
     class Meta:
         model = Maintainer
 MaintainerFormSet = inlineformset_factory(Package, Maintainer, 
-                                          form=MaintainerForm, extra=0)
+                                          form=MaintainerForm, extra=1)
 
 class PackageForm(forms.ModelForm):
     class Meta:
