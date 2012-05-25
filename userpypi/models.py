@@ -79,6 +79,12 @@ class Package(models.Model):
         get_latest_by = "releases__latest"
         ordering = ['name',]
         unique_together = ('owner', 'name',)
+        permissions = (
+            ('read_packages', 'Read Packages'),
+            ('update_packages', 'Update Packages'),
+            ('create_packages', 'Create Packages'),
+            ('admin', 'Administrator'),
+        )
 
     def __unicode__(self):
         return self.name
