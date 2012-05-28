@@ -1,5 +1,6 @@
 from django.conf import settings
 from django.core.urlresolvers import reverse
+from django.contrib.auth.models import User
 from django.forms.models import inlineformset_factory
 from django.http import Http404, HttpResponseRedirect
 from django.views.generic import ListView, DetailView, UpdateView
@@ -16,18 +17,30 @@ from userpypi.utils import get_class
 class ReleaseOwnerObjectMixin(object):
     def get_context_data(self, **kwargs):
         context = super(ReleaseOwnerObjectMixin, self).get_context_data(**kwargs)
-        context['owner'] = self.kwargs.get('owner', None)
+        context['owner'] = self.get_owner()
         context['is_owner'] = self.owner == self.request.user.username
         return context
+    
+    def get_owner(self):
+        """
+        Set the owner user object
+        """
+        owner = getattr(self, 'owner')
+        if owner and issubclass(owner.__class__, User):
+            return owner
+        owner = self.kwargs.get('owner', None)
+        if owner is not None:
+            self.owner = User.objects.get(username=owner)
+        else:
+            self.owner = None
+        return self.owner
     
     def get_queryset(self):
         """
         Filter the queryset based on whether or not the requesting user is
         the owner of the requested objects
         """
-        self.owner = self.kwargs['owner']
-        
-        if self.request.user.username != self.owner:
+        if self.request.user != self.get_owner():
             params = dict(package__owner__username=self.owner, package__private=False)
         else:
             params = dict(package__owner=self.request.user)
