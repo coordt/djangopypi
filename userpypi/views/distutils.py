@@ -2,10 +2,11 @@ import os
 
 from django.db import transaction
 from django.http import (HttpResponseForbidden, HttpResponseBadRequest, 
-                         HttpResponse)
+                         HttpResponse, Http404)
 from django.utils.translation import ugettext_lazy as _
 from django.utils.datastructures import MultiValueDict
 from django.contrib.auth import login
+from django.contrib.auth.models import User
 
 from userpypi.decorators import basic_auth
 from userpypi.forms import PackageForm, ReleaseForm
@@ -63,40 +64,78 @@ def submit_package_or_release(user, post_data, files):
 
     return HttpResponse()
 
+def authorize(request_user, owner_user, package):
+    """
+    Go through the checks to see if the user is authorized to perform any actions
+    
+    Returns: success, err_msg
+    """
+    MUST_CREATE = package is not None
+    
+    if owner_user.profile.organization:
+        try:
+            membership = request_user.memberships.get(team=owner_obj)
+        except request_user.DoesNotExist:
+            return False, 'You are not a member of team %s' % owner.username
+        if MUST_CREATE and membership.permission < 3: # Can't create a new package
+            return False, 'You can not create packages'
+        if membership.permission == 1:
+            return False, 'You can not update packages'
+        return True, ''
+    
+    if request_user != owner_user:
+        if MUST_CREATE:
+            return False, "You can not create a package on someone else's account."
+        try:
+            maintainer = package.maintainers.get(user=request_user)
+        except request_user.DoesNotExist:
+            return False, 'You are not a maintainer of %s' % package.name
+        if membership.permission == 1:
+            return False, 'You can not update packages'
+    return True, ''
+
 @basic_auth
 @transaction.commit_manually
 def register_or_upload(request, owner=None):
     if request.method != 'POST':
         transaction.rollback()
         return HttpResponseBadRequest('Only post requests are supported')
-    name = request.POST.get('name', None).strip()
     
+    name = request.POST.get('name', None).strip()
     if not name:
         transaction.rollback()
         return HttpResponseBadRequest('No package name specified')
-    try:
-        package = Package.objects.get(owner=request.user, name=name)
-    except Package.DoesNotExist:
-        package = Package.objects.create(owner=request.user, name=name)
-    
-    if (request.user != package.owner and 
-        request.user not in package.maintainers.all()):
-        transaction.rollback()
-        return HttpResponseForbidden(
-            'You are not an owner/maintainer of %s' % (package.name,))
     
     version = request.POST.get('version', None).strip()
     metadata_version = request.POST.get('metadata_version', None).strip()
-    
     if not version or not metadata_version:
         transaction.rollback()
         return HttpResponseBadRequest(
             'Release version and metadata version must be specified')
-    
     if not metadata_version in METADATA_FIELDS:
         transaction.rollback()
         return HttpResponseBadRequest('Metadata version must be one of: %s' 
                                       (', '.join(METADATA_FIELDS.keys()),))
+    
+    try:
+        owner_obj = User.objects.get(username=owner)
+    except User.DoesNotExist:
+        transaction.rollback()
+        raise Http404
+    
+    try:
+        package = Package.objects.get(owner=owner_obj, name=name)
+    except Package.DoesNotExist:
+        package = None
+    
+    authorized, err_msg = authorize(request.user, owner_obj, package)
+    
+    if not authorized:
+        transaction.rollback()
+        return HttpResponseForbidden(err_msg)
+    
+    if package is None:
+        package = Package.objects.create(owner=owner_obj, name=name)
     
     release, created = Release.objects.get_or_create(package=package,
                                                      version=version)
