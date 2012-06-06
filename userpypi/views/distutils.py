@@ -74,7 +74,7 @@ def authorize(request_user, owner_user, package):
     
     if owner_user.profile.organization:
         try:
-            membership = request_user.memberships.get(team=owner_obj)
+            membership = request_user.memberships.get(team=owner_user)
         except request_user.DoesNotExist:
             return False, 'You are not a member of team %s' % owner.username
         if MUST_CREATE and membership.permission < 3: # Can't create a new package
