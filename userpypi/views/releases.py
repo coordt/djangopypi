@@ -30,9 +30,12 @@ class ReleaseOwnerObjectMixin(object):
             return owner
         owner = self.kwargs.get('owner', None)
         if owner is not None:
-            self.owner = User.objects.get(username=owner)
+            try:
+                self.owner = User.objects.get(username=owner)
+            except User.DoesNotExist:
+                raise Http404
         else:
-            self.owner = None
+            raise Http404
         return self.owner
     
     def get_queryset(self):
@@ -41,9 +44,10 @@ class ReleaseOwnerObjectMixin(object):
         the owner of the requested objects
         """
         if self.request.user != self.get_owner():
-            params = dict(package__owner__username=self.owner, package__private=False)
-        else:
-            params = dict(package__owner=self.request.user)
+            if self.owner.profile.organization:
+                params = dict(package__owner__username=self.owner)
+            else:
+                params = dict(package__owner=self.request.user, private=False)
         return self.model.objects.filter(**params)
 
 

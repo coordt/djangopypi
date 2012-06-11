@@ -44,9 +44,12 @@ class OwnerObjectMixin(object):
         the owner of the requested objects
         """
         if self.request.user != self.get_owner():
-            params = dict(owner=self.owner, private=False)
+            if self.owner.profile.organization:
+                params = dict(owner=self.owner)
+            else:
+                params = dict(owner=self.owner, private=False)
         else:
-            params = dict(owner=self.request.user)
+            params = dict(owner=self.owner)
         return self.model.objects.filter(**params)
 
 
