@@ -1,14 +1,15 @@
 from django.conf import settings
+from django.core.exceptions import ObjectDoesNotExist
 from django.core.urlresolvers import reverse
 from django.contrib.auth.models import User
 from django.forms.models import inlineformset_factory
-from django.http import Http404, HttpResponseRedirect
-from django.views.generic import ListView, DetailView, UpdateView
-from django.views.generic import list_detail, create_update
+from django.http import Http404
+from django.views.generic import ListView, DetailView
+from django.views.generic import create_update
 from django.shortcuts import get_object_or_404, render_to_response
 from django.template import RequestContext
 
-from userpypi.decorators import user_owns_package, user_maintains_package
+from userpypi.decorators import user_maintains_package
 from userpypi.models import Package, Release, Distribution
 from userpypi.forms import ReleaseForm, DistributionUploadForm
 from userpypi.settings import METADATA_FORMS
